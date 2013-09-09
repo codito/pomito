@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InterruptionWindow</class>
+ <widget class="QWidget" name="InterruptionWindow">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>145</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Pomito - Interruption</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="pomito.qrc">
+    <normaloff>:/icon_pomito</normaloff>:/icon_pomito</iconset>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="2">
+    <widget class="QPlainTextEdit" name="txt_description">
+     <property name="tabChangesFocus">
+      <bool>false</bool>
+     </property>
+     <property name="plainText">
+      <string>Describe the interruption briefly</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="chk_external">
+     <property name="text">
+      <string>&amp;External interruption</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QPushButton" name="btn_start_interrupt">
+     <property name="font">
+      <font>
+       <family>Sans Serif</family>
+      </font>
+     </property>
+     <property name="text">
+      <string>&amp;Start Interruption</string>
+     </property>
+     <property name="icon">
+      <iconset resource="pomito.qrc">
+       <normaloff>:/icon_interrupt</normaloff>:/icon_interrupt</iconset>
+     </property>
+     <property name="default">
+      <bool>true</bool>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="act_hide_window">
+   <property name="text">
+    <string>hide</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="pomito.qrc"/>
+ </resources>
+ <connections/>
+</ui>
