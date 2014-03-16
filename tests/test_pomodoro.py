@@ -139,9 +139,11 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service.signal_break_stopped.disconnect(self.dummy_callback)
 
     def test_get_data_dir_returns_correct_default(self):
-        expected_data_dir = os.path.join(os.getenv("XDG_DATA_HOME"), "pomito")
-        if sys.platform.startswith("win"):
-            expected_data_dir = os.path.join(os.path.expanduser("~"), "pomito")
+        expected_data_dir = os.path.join(os.path.expanduser("~"), "pomito")
+        if sys.platform.startswith("linux"):
+            home_dir = os.getenv("HOME")
+            alt_data_dir = os.path.join(home_dir, ".local/share")
+            expected_data_dir = os.path.join(os.getenv("XDG_DATA_HOME") or alt_data_dir, "pomito")
 
         data_dir = self.pomodoro_service.get_data_dir()
 

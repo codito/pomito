@@ -15,8 +15,9 @@ import pomito.plugins
 PACKAGE_NAME = "pomito"
 DATA_HOME = CONFIG_HOME = os.path.expanduser("~")
 if sys.platform.startswith("linux"):
-    DATA_HOME = os.getenv("XDG_DATA_HOME")
-    CONFIG_HOME = os.getenv("XDG_CONFIG_HOME")
+    home_dir = os.getenv("HOME")
+    DATA_HOME = os.getenv("XDG_DATA_HOME") or os.path.join(home_dir, ".local/share")
+    CONFIG_HOME = os.getenv("XDG_CONFIG_HOME") or os.path.join(home_dir, ".config")
 
 DATA_DIR = os.path.join(DATA_HOME, PACKAGE_NAME)
 CONFIG_DIR = os.path.join(CONFIG_HOME, PACKAGE_NAME)
