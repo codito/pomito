@@ -8,7 +8,7 @@ from pomito import main, pomodoro, task
 from pomito.plugins.ui import UIPlugin
 from pomito.test import FakeMessageDispatcher, FakeTimer, PomitoTestFactory
 
-import py
+import nose
 import sure
 
 class PomodoroServiceTests(unittest.TestCase):
@@ -155,7 +155,7 @@ class PomodoroServiceTests(unittest.TestCase):
 
         pomodoro_service.get_db().should.be.equal(test_db)
 
-    @py.test.mark.perf
+    @nose.plugins.attrib.attr("perf")
     def test_session_started_perf(self):
         t = Mock(spec=task.Task)
         pomito = main.Pomito(None)
@@ -213,7 +213,7 @@ class TimerTests(unittest.TestCase):
         self.assertListEqual(self.mock_callback.call_args_list, [(('interrupt',),
             {})], 'invalid notify_reason')
 
-    @py.test.mark.perf
+    @nose.plugins.attrib.attr("perf")
     def test_callback_granular(self):
         duration = 60.00
         delta_granular = 1.0    # windows
