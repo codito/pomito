@@ -6,6 +6,7 @@ from unittest.mock import Mock
 
 from pomito import main, pomodoro, task
 from pomito.plugins.ui import UIPlugin
+from pomito.plugins.task import TaskPlugin
 from pomito.test import FakeMessageDispatcher, FakeTimer, PomitoTestFactory
 
 import nose
