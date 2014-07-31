@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/codito/pomito.svg?branch=master)](https://travis-ci.org/codito/pomito)
+
 pomito
 ======
 
