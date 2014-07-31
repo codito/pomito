@@ -15,16 +15,21 @@ def initialize(pomodoro_service):
     Args:
         pomodoro_service pomodoro.Pomodoro - The pomodoro service object
     """
+    import os
+
     from .ui import console
-    from .ui import qtapp
     from .task import text
     from .task import rtm
 
     global PLUGINS
     PLUGINS = {'console': console.Console(pomodoro_service),
-               'qtapp': qtapp.QtUI(pomodoro_service),
                'text': text.TextTask(pomodoro_service),
                'rtm': rtm.RTMTask(pomodoro_service)}
+
+    if os.environ.get("POMITO_TEST") is None:
+        from .ui import qtapp
+
+        PLUGINS['qtapp'] = qtapp.QtUI(pomodoro_service)
 
 def get_plugin(plugin_name):
     return PLUGINS[plugin_name]
