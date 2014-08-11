@@ -45,12 +45,12 @@ setup(
     description='Simple pomodoro timer with support for tasks and hooks',
     long_description=open('README.md').read(),
     install_requires=[
-        "pywin32==218",
-        "peewee==2.1.4",
-        "pyrtm==0.4.1",
-        "blinker==1.3",
-        "comtypes==0.6.2",
-        "cx-freeze==4.3.1",
+        "pywin32",
+        "peewee",
+        "pyrtm",
+        "blinker",
+        "comtypes",
+        "cx-freeze",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -64,10 +64,10 @@ setup(
     ],
     test_suite='py.test',
     tests_require=[
-        "pyfakefs==2.2",
-        "pytest==2.3.5",
-        "pytest-cov==1.6",
-        "sure==1.2.2",
+        "pyfakefs",
+        "pytest",
+        "pytest-cov",
+        "sure",
     ],
     options = dict(build_exe = buildOptions),
     executables = executables
