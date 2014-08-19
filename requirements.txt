@@ -8,3 +8,4 @@ python-termstyle
 rednose
 sure
 six
+pylint
