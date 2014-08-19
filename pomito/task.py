@@ -23,13 +23,13 @@ class Task(object):
             self.tags = tags
             self.completed = 0  # If a task is completed, there should be no object created
         except ValueError:
-            print("Attempt to parse invalid task. Task attributes: '{0}' '{1}' '{2}' '{3}' '{4}'"\
+            raise Exception("Attempt to parse invalid task. Task attributes: '{0}' '{1}' '{2}' '{3}' '{4}'"\
                   .format(uid, description, estimate, actual, tags))
 
         # Every task will have a unique id, which is the md5sum of description.
         if self.uid == None:
             m = hashlib.md5()
-            m.update(self.description)
+            m.update(self.description.encode('utf-8'))
             self.uid = m.hexdigest()
 
         return
