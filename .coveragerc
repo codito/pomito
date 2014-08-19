@@ -1,0 +1,3 @@
+[run]
+debug = trace, sys, config
+omit = *ui*.py
