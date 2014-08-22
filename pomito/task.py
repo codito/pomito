@@ -11,9 +11,9 @@ class Task(object):
 
         Args:
             description: Description of the task
-            estimated_time: Estimated time to complete the task
+            estimated_time: Estimated pomodoros to complete the task
             priority: Priority associated with the task
-            percent_complete: Amount of task completed (a percent)
+            actual: Number of pomodoros completed
         """
         try:
             self.uid = uid
@@ -44,10 +44,10 @@ class Task(object):
         return
 
     def update_estimate(self, new_estimate):
-        self.estimate = new_estimate
+        self.estimate = int(new_estimate)
         return
 
-    def completed(self):
+    def mark_complete(self):
         self.completed = 1
         return
 
