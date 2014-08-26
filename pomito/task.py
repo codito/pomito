@@ -51,12 +51,6 @@ class Task(object):
         self.completed = 1
         return
 
-    @staticmethod
-    def parse(task):
-        from .plugins.task import text
-
-        return Task(*text.TextTask.parse(str(task)))
-
 def get_null_task():
     """Returns a null task."""
     return Task(0, 0, 0, None, "No task selected.")
