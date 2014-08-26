@@ -65,3 +65,12 @@ class TaskTests(unittest.TestCase):
         self.test_task.mark_complete()
 
         self.test_task.completed.should.be(1)
+
+    def test_get_null_task_returns_dummy_task(self):
+        dummy_task = pomito.task.get_null_task()
+
+        dummy_task.actual.should.be(0)
+        dummy_task.completed.should.be(0)
+        dummy_task.description.should.equal("No task selected.")
+        dummy_task.estimate.should.be(0)
+        dummy_task.tags.should.be(None)
