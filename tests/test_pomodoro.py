@@ -7,7 +7,7 @@ from unittest.mock import Mock
 from pomito import main, pomodoro, task
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
-from pomito.test import FakeMessageDispatcher, FakeTimer, PomitoTestFactory
+from pomito.test import FakeMessageDispatcher, PomitoTestFactory
 
 import nose
 import sure
@@ -49,6 +49,15 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service \
             ._pomito_instance \
             .task_plugin.get_tasks.assert_called_once_with()
+
+    def test_start_session_throws_if_no_task_is_provided(self):
+        mock_task_plugin = self.pomodoro_service._pomito_instance.task_plugin
+        mock_task_plugin.is_valid_task.return_value = False
+
+        self.pomodoro_service \
+            .start_session.when \
+            .called_with(None) \
+            .should.throw(Exception)
 
     def test_stop_session_waits_for_timer_thread_to_join(self):
         self.pomodoro_service.start_session(self.dummy_task)
