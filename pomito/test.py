@@ -13,19 +13,26 @@ from pomito.plugins.task import TaskPlugin
 
 class FakeTimer(object):
     """A synchronous fake timer."""
+
     def __init__(self, duration, callback, interval=1):
         self.duration = duration
         self.time_elapsed = interval
         self._interval = interval
         self._parent_callback = callback
+        self._alive = False
 
     def is_running(self):
-        return not self._finished.is_set()
+        return True
 
     def is_alive(self):
-        return False
+        return self._alive
+
+    def join(self):
+        # We're forcing join to be called for all fake timers
+        self._alive = False
 
     def start(self):
+        self._alive = True
         self._parent_callback('increment')
 
     def stop(self):
@@ -60,7 +67,7 @@ class PomitoTestFactory(object):
         replace os/path calls. See tests/hooks/test_activity.py for example.
         """
         pomito = main.Pomito(None, database=SqliteDatabase(':memory'),
-                create_message_dispatcher=lambda: FakeMessageDispatcher())
+                             create_message_dispatcher=lambda: FakeMessageDispatcher())
         pomito.ui_plugin = Mock(spec=UIPlugin)
         pomito.task_plugin = Mock(spec=TaskPlugin)
         pomito.task_plugin.is_valid_task.return_value = True

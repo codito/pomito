@@ -43,6 +43,27 @@ class PomodoroServiceTests(unittest.TestCase):
             .called_with("dummy_plugin", "dummy_key") \
             .should.throw(configparser.NoSectionError)
 
+    def test_get_tasks_returns_tasks_for_the_user(self):
+        self.pomodoro_service.get_tasks()
+
+        self.pomodoro_service \
+            ._pomito_instance \
+            .task_plugin.get_tasks.assert_called_once_with()
+
+    def test_stop_session_waits_for_timer_thread_to_join(self):
+        self.pomodoro_service.start_session(self.dummy_task)
+        self.pomodoro_service._timer.is_alive().should.be(True)
+
+        self.pomodoro_service.stop_session()
+        self.pomodoro_service._timer.is_alive().should.be(False)
+
+    def test_stop_break_waits_for_timer_thread_to_join(self):
+        self.pomodoro_service.start_break()
+        self.pomodoro_service._timer.is_alive().should.be(True)
+
+        self.pomodoro_service.stop_break()
+        self.pomodoro_service._timer.is_alive().should.be(False)
+
     def test_session_started_is_called_with_correct_session_count(self):
         self.pomodoro_service.signal_session_started \
             .connect(self.dummy_callback, weak=False)
