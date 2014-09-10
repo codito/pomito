@@ -6,8 +6,10 @@ import cmd
 from pomito.plugins import ui
 
 class Console(ui.UIPlugin, cmd.Cmd):
-    intro = "Welcome to Pomito shell. Type 'help' or '?' to list available commands."
-    prompt = "-- pomito:: "
+    """Interactive shell for pomito app."""
+    intro = "Welcome to Pomito shell.\n\
+Type 'help' or '?' to list available commands."
+    prompt = "pomito> "
 
     def __init__(self, pomodoro_service):
         self._message_queue = []
@@ -26,6 +28,7 @@ class Console(ui.UIPlugin, cmd.Cmd):
         return
 
     def do_quit(self, args):
+        """Quit the shell."""
         print("Good bye!")
         return False
 
