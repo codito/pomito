@@ -3,6 +3,8 @@
 
 import cmd
 
+import click
+
 from pomito.plugins import ui
 
 class Console(ui.UIPlugin, cmd.Cmd):
@@ -10,9 +12,11 @@ class Console(ui.UIPlugin, cmd.Cmd):
     intro = "Welcome to Pomito shell.\n\
 Type 'help' or '?' to list available commands."
     prompt = "pomito> "
+    pomodoro_service = None
 
     def __init__(self, pomodoro_service):
         self._message_queue = []
+        self.pomodoro_service = pomodoro_service
         self._pomodoro = pomodoro_service
         cmd.Cmd.__init__(self)
 
@@ -88,3 +92,12 @@ Type 'help' or '?' to list available commands."
             self.do_quit(None)
         return
 
+@click.group()
+def pomito_shell():
+    """Command group for pomito interactive shell."""
+    pass
+
+@pomito_shell.command("start")
+def pomito_start():
+    """Starts a pomito session."""
+    pass
