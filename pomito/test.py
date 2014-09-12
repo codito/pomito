@@ -2,7 +2,7 @@
 # Pomito - Pomodoro timer on steroids
 # Test doubles
 
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 from unittest.mock import patch
 
 from peewee import SqliteDatabase
@@ -74,7 +74,7 @@ class PomitoTestFactory(object):
                              create_message_dispatcher=lambda:
                              self.message_dispatcher)
         pomito.ui_plugin = Mock(spec=UIPlugin)
-        pomito.task_plugin = Mock(spec=TaskPlugin)
+        pomito.task_plugin = MagicMock(spec=TaskPlugin)
         pomito.task_plugin.is_valid_task.return_value = True
 
         def create_fake_timer(duration, callback, interval=0.1):
