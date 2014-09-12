@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import Mock
 
 from click.testing import CliRunner
+from sure import expect
 
 from pomito import task
 from pomito.plugins.ui.console import *
@@ -31,22 +32,26 @@ class ConsoleTests(unittest.TestCase):
         self.pomodoro_service._pomito_instance.exit()
 
     def test_shell_text_should_be_pomito(self):
-        self.console.prompt.should.equal("pomito> ")
-
-    def test_shell_pomodoro_service_is_none_by_default(self):
-        Console.pomodoro_service.should.be.none
-
-    def test_shell_pomodoro_service_is_set(self):
-        self.console.pomodoro_service.should.be(self.pomodoro_service)
+        expect(self.console.prompt).to.equal("pomito> ")
 
     def test_shell_provides_start_command(self):
-        out = self._invoke_command("start")
-        out.exception.should.be.none
+        out = self._invoke_command("start", "0")
+        expect(out.exception).to.be.none
         out.exit_code.should.be.equal(0)
 
     def test_start_starts_a_pomodoro_session(self):
-        out = self._invoke_command("start")
-        # TODO
+        self.pomodoro_service.signal_session_started\
+            .connect(self.dummy_callback, weak=False)
 
-    def _invoke_command(self, command):
-        return self.runner.invoke(pomito_shell, args=[command])
+        out = self._invoke_command("start", "0")
+
+        expect(out.exit_code).to.be(0)
+        expect(self.dummy_callback.call_count).to.equal(1)
+
+        self.pomodoro_service.signal_session_started\
+            .disconnect(self.dummy_callback)
+
+    def _invoke_command(self, command, args):
+        out = self.runner.invoke(pomito_shell, args=[command, args],
+                                 catch_exceptions=False)
+        return out
