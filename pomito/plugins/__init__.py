@@ -18,11 +18,13 @@ def initialize(pomodoro_service):
     import os
 
     from .ui import console
-    from .task import text
+    from .task import asana
     from .task import rtm
+    from .task import text
 
     global PLUGINS
     PLUGINS = {'console': console.Console(pomodoro_service),
+               'asana': asana.AsanaTask(pomodoro_service),
                'text': text.TextTask(pomodoro_service),
                'rtm': rtm.RTMTask(pomodoro_service)}
 
