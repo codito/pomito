@@ -430,7 +430,8 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
         return
 
     def get_task(self):
-        self._taskmodel.updateTasks(self._service.get_tasks())
+        tasks = list(self._service.get_tasks())
+        self._taskmodel.updateTasks(tasks)
         self._apply_task_filter("")
         self.show()
         return
