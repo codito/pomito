@@ -1,0 +1,3 @@
+-r requirements.txt
+pudb
+nose-pudb

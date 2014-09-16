@@ -3,15 +3,32 @@
 
 import cmd
 
+import click
+
 from pomito.plugins import ui
 
+_POMODORO_SERVICE = None
+def _get_pomodoro_service():
+    """Gets pomodoro service."""
+    if _POMODORO_SERVICE is None:
+        raise RuntimeError("Console.pomodoro_service is not initialized.")
+    return _POMODORO_SERVICE
+
+def _set_pomodoro_service(pomodoro_service):
+    """Sets pomodoro service."""
+    # pylint: disable=global-statement
+    global _POMODORO_SERVICE
+    _POMODORO_SERVICE = pomodoro_service
+
 class Console(ui.UIPlugin, cmd.Cmd):
-    intro = "Welcome to Pomito shell. Type 'help' or '?' to list available commands."
-    prompt = "-- pomito:: "
+    """Interactive shell for pomito app."""
+    intro = "Welcome to Pomito shell.\n\
+Type 'help' or '?' to list available commands."
+    prompt = "pomito> "
 
     def __init__(self, pomodoro_service):
         self._message_queue = []
-        self._pomodoro = pomodoro_service
+        _set_pomodoro_service(pomodoro_service)
         cmd.Cmd.__init__(self)
 
     def initialize(self):
@@ -26,6 +43,7 @@ class Console(ui.UIPlugin, cmd.Cmd):
         return
 
     def do_quit(self, args):
+        """Quit the shell."""
         print("Good bye!")
         return False
 
@@ -84,4 +102,17 @@ class Console(ui.UIPlugin, cmd.Cmd):
             self._print_message("Got keyboard interrupt.")
             self.do_quit(None)
         return
+
+@click.group()
+def pomito_shell():
+    """Command group for pomito interactive shell."""
+    pass
+
+@pomito_shell.command("start")
+@click.argument('task_id', type=int)
+def pomito_start(task_id):
+    """Starts a pomito session."""
+    pomodoro_service = _get_pomodoro_service()
+    tasks = pomodoro_service.get_tasks()
+    pomodoro_service.start_session(tasks[int(task_id)])
 
