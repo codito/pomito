@@ -2,10 +2,14 @@
 # A simple console UI plugin
 
 import cmd
+import logging
 
 import click
 
 from pomito.plugins import ui
+
+# pylint: disable=invalid-name
+logger = logging.getLogger("pomito.plugins.ui.console")
 
 _POMODORO_SERVICE = None
 def _get_pomodoro_service():
@@ -20,10 +24,34 @@ def _set_pomodoro_service(pomodoro_service):
     global _POMODORO_SERVICE
     _POMODORO_SERVICE = pomodoro_service
 
+@click.group()
+def pomito_shell():
+    """Command group for pomito interactive shell."""
+    pass
+
+@pomito_shell.command("start")
+@click.argument('task_id', type=int)
+def pomito_start(task_id):
+    """Starts a pomito session."""
+    pomodoro_service = _get_pomodoro_service()
+    tasks = pomodoro_service.get_tasks()
+    pomodoro_service.start_session(tasks[int(task_id)])
+
+@pomito_shell.command("list")
+def pomito_list():
+    """Lists available tasks."""
+    pomodoro_service = _get_pomodoro_service()
+    tasks = pomodoro_service.get_tasks()
+    for t in tasks:
+        click.echo(t)
+
 class Console(ui.UIPlugin, cmd.Cmd):
     """Interactive shell for pomito app."""
     intro = "Welcome to Pomito shell.\n\
 Type 'help' or '?' to list available commands."
+    # TODO should the prompt be two lines
+    # [<timer>  <Task>]
+    # >
     prompt = "pomito> "
 
     def __init__(self, pomodoro_service):
@@ -47,22 +75,14 @@ Type 'help' or '?' to list available commands."
         print("Good bye!")
         return False
 
-    def do_start(self, args):
-        tasks = self._pomodoro.get_tasks()
-        c = 0
-        for t in tasks:
-            print("[{0}] {1}".format(c, t))
-            c += 1
+    def do_parse(self, args):
+        try:
+            pomito_shell.main(args=args.split())
+        except SystemExit:
+            return
 
-        tid = ""
-        while tid.isdigit() == False:
-            tid = input("Enter task id: ")
-        self._pomodoro.start_session(tasks[int(tid)])
-        return
-
-    def do_stop(self, args):
-        self._pomodoro.stop_session()
-        return
+    def precmd(self, line):
+        return "parse {0}".format(line)
 
     def postcmd(self, stop, line):
         if line == "quit":
@@ -102,17 +122,4 @@ Type 'help' or '?' to list available commands."
             self._print_message("Got keyboard interrupt.")
             self.do_quit(None)
         return
-
-@click.group()
-def pomito_shell():
-    """Command group for pomito interactive shell."""
-    pass
-
-@pomito_shell.command("start")
-@click.argument('task_id', type=int)
-def pomito_start(task_id):
-    """Starts a pomito session."""
-    pomodoro_service = _get_pomodoro_service()
-    tasks = pomodoro_service.get_tasks()
-    pomodoro_service.start_session(tasks[int(task_id)])
 

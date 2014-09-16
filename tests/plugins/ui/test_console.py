@@ -2,7 +2,7 @@
 """
 
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 from click.testing import CliRunner
 from sure import expect
@@ -24,7 +24,9 @@ class ConsoleTests(unittest.TestCase):
         self.pomodoro_service = test_factory.create_fake_service()
         self.console = Console(self.pomodoro_service)
 
-        self.dummy_task = Mock(spec=task.Task)
+        self.dummy_task = MagicMock(spec=task.Task)
+        self.pomodoro_service._pomito_instance\
+            .task_plugin.get_tasks.return_value = [self.dummy_task]
         self.dummy_callback = Mock()
 
     def tearDown(self):
@@ -39,6 +41,12 @@ class ConsoleTests(unittest.TestCase):
         expect(out.exception).to.be.none
         out.exit_code.should.be.equal(0)
 
+    def test_list_prints_all_available_tasks(self):
+        out = self._invoke_command("list")
+
+        expect(out.exit_code).to.equal(0)
+        expect(out.output).to.equal(str(self.dummy_task) + "\n")
+
     def test_start_starts_a_pomodoro_session(self):
         self.pomodoro_service.signal_session_started\
             .connect(self.dummy_callback, weak=False)
@@ -51,7 +59,8 @@ class ConsoleTests(unittest.TestCase):
         self.pomodoro_service.signal_session_started\
             .disconnect(self.dummy_callback)
 
-    def _invoke_command(self, command, args):
-        out = self.runner.invoke(pomito_shell, args=[command, args],
+    def _invoke_command(self, command, args=None):
+        args_list = [command, args] if args is not None else [command]
+        out = self.runner.invoke(pomito_shell, args_list,
                                  catch_exceptions=False)
         return out
