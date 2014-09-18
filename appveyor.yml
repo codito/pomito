@@ -12,13 +12,13 @@ install:
   - ps: "ls \"C:/\""
   - ECHO "Installed SDKs:"
   - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
-  - ECHO "Install python"
-  - ps: "choco install python"
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - ECHO "Set python path"
+  - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "pip --version"
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
