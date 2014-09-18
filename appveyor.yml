@@ -6,6 +6,7 @@ deploy: off
 init:
   - cmd: rd /s /q %CHOCOLATEYINSTALL%
   - ps: iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
+  - ps: choco install wget
 
 install:
   - ECHO "Filesystem root:"
@@ -14,10 +15,13 @@ install:
   - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
   - ECHO "Set python path"
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
+  - ps: wget.exe http://kaz.dl.sourceforge.net/project/pyqt/PyQt5/PyQt-5.3.2/PyQt5-5.3.2-gpl-Py3.4-Qt5.3.1-x32.exe -O "$env:temp/pyqt5_install.exe"
+  - ps: & $env:temp/pyqt5_install.exe /s
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "python -c \"import PyQt5\""
   - "pip --version"
 
 build_script:
