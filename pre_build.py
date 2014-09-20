@@ -9,7 +9,7 @@ def get_pyqt_install_root():
     """Gets pyqt install path in windows environment."""
     pyqt_install_root = None
     if sys.platform == "win32":
-        python_root = path.split(sys.executable)
+        python_root = path.split(sys.executable)[0]
         pyqt_install_root = path.join(python_root, "Lib\\site-packages\\PyQt5")
     return pyqt_install_root
 
