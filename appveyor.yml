@@ -28,3 +28,8 @@ build_script:
 
 test_script:
   - "nosetests"
+
+artifacts:
+  - path: build\exe.win32-3.4
+    name: pomito.{version}.win32
+    type: zip
