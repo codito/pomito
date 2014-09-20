@@ -26,7 +26,7 @@ build_script:
   - "pip install -r requirements.txt"
   - "python setup.py build"
   - cd build/exe.win32-3.4
-  - ps: "& 7z a -r ../pomito.$(appveyor_build_version).win32.zip ."
+  - ps: "& 7z a -r ../pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip ."
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
