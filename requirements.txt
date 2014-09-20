@@ -4,11 +4,8 @@ mock
 nose
 peewee
 pyfakefs
-python-termstyle
 rednose
 sure
-six
-pylint
 comtypes
 click
 -e git://github.com/codito/asana.git@python3#egg=asana
