@@ -15,7 +15,7 @@ install:
   - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
   - ECHO "Set python path"
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
-  - ps: "& wget.exe \"http://kaz.dl.sourceforge.net/project/pyqt/PyQt5/PyQt-5.3.2/PyQt5-5.3.2-gpl-Py3.4-Qt5.3.1-x32.exe\" -O $env:temp/pyqt5_install.exe --quiet"
+  - ps: "& wget.exe \"http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.3.2/PyQt5-5.3.2-gpl-Py3.4-Qt5.3.1-x32.exe\" -O $env:temp/pyqt5_install.exe --quiet"
   - ps: "& $env:temp/pyqt5_install.exe /S"
   - ps: "Wait-Process -Name pyqt5_install -Timeout 600"
 
