@@ -31,5 +31,5 @@ test_script:
 
 artifacts:
   - path: build\exe.win32-3.4
-    name: pomito.{version}.win32
+    name: "pomito.$(appveyor_build_version).win32"
     type: zip
