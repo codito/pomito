@@ -1,38 +1,38 @@
+"""Setup script for pomito."""
+
 import sys
 from setuptools import setup
-from io import open
 
 from cx_Freeze import setup, Executable
 
-from pre_build import build_qt
+from pre_build import build_qt, get_pyqt_install_root
 
 # Build qt related resources
 build_qt()
 
 # Setup cx_freeze packaging
+# pylint: disable=invalid-name
 base = None
 includefiles = None
 if sys.platform == "win32":
+    from os import path
+    pyqt_windows_root = get_pyqt_install_root()
     includefiles = [
-            ("C:\Python33\Lib\site-packages\PyQt5\plugins\platforms\qwindows.dll", "platforms\qwindows.dll"),
-            ("pomito\\plugins\\ui\\wintaskbar.tlb", "wintaskbar.tlb"),
-        ]
+        (path.join(pyqt_windows_root, "plugins\\platforms\\qwindows.dll"),
+         "platforms\\qwindows.dll"),
+        ("pomito\\plugins\\ui\\wintaskbar.tlb", "wintaskbar.tlb"),
+    ]
 
 includefiles += [
     ("docs\\sample_config.ini", "docs\\sample_config.ini"),
     ("docs\\sample_todo.txt", "docs\\sample_todo.txt"),
 ]
 
-buildOptions = dict(packages = [],
-        excludes = [],
-        includes = [
-            "atexit",
-            "sip",
-        ],
-        include_files = includefiles,
-        )
+buildOptions = dict(packages=[], excludes=[],
+                    includes=["atexit", "sip",],
+                    include_files=includefiles)
 
-executables = [Executable('pomito.py', base = base)]
+executables = [Executable('pomito.py', base=base)]
 
 setup(
     name='Pomito',
@@ -59,7 +59,7 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Topic :: Utilities",
     ],
     test_suite='py.test',
@@ -69,6 +69,6 @@ setup(
         "pytest-cov",
         "sure",
     ],
-    options = dict(build_exe = buildOptions),
-    executables = executables
+    options=dict(build_exe=buildOptions),
+    executables=executables
 )
