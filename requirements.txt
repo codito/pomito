@@ -6,6 +6,7 @@ peewee
 pyfakefs
 rednose
 sure
+six
 comtypes
 click
 -e git://github.com/codito/asana.git@python3#egg=asana
