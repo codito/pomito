@@ -1,21 +1,17 @@
 os: Windows Server 2012 R2
 
-test: off
 deploy: off
 
 init:
-  - cmd: rd /s /q %CHOCOLATEYINSTALL%
-  - ps: iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
-  - ps: choco install wget
+  - echo "Filesystem root:"
+  - ps: "ls -Name \"C:/\""
+  - echo "Installed SDKs:"
+  - ps: "ls -Name \"C:/Program Files/Microsoft SDKs/Windows\""
+  - echo "Set python path"
+  - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
 install:
-  - ECHO "Filesystem root:"
-  - ps: "ls \"C:/\""
-  - ECHO "Installed SDKs:"
-  - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
-  - ECHO "Set python path"
-  - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
-  - ps: "& wget.exe \"http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.3.2/PyQt5-5.3.2-gpl-Py3.4-Qt5.3.1-x32.exe\" -O $env:temp/pyqt5_install.exe --quiet"
+  - ps: Start-FileDownload "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.3.2/PyQt5-5.3.2-gpl-Py3.4-Qt5.3.1-x32.exe" -FileName $env:temp/pyqt5_install.exe
   - ps: "& $env:temp/pyqt5_install.exe /S"
   - ps: "Wait-Process -Name pyqt5_install -Timeout 600"
 
@@ -28,4 +24,7 @@ install:
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - "pip install -r requirements.txt"
+  - "python setup.py build"
+
+test_script:
   - "nosetests"
