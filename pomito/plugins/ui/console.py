@@ -42,8 +42,14 @@ def pomito_list():
     """Lists available tasks."""
     pomodoro_service = _get_pomodoro_service()
     tasks = pomodoro_service.get_tasks()
+    count = 0
     for t in tasks:
+        if count > 10:
+            click.echo("\nShowing first 10 tasks, use `list *`"\
+                       + "to show all tasks.")
+            break
         click.echo(t)
+        count += 1
 
 class Console(ui.UIPlugin, cmd.Cmd):
     """Interactive shell for pomito app."""

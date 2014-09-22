@@ -41,11 +41,33 @@ class ConsoleTests(unittest.TestCase):
         expect(out.exception).to.be.none
         out.exit_code.should.be.equal(0)
 
-    def test_list_prints_all_available_tasks(self):
+    def test_list_prints_first_ten_available_tasks(self):
+        more_task_msg = "\nShowing first 10 tasks, use `list *`"\
+            + "to show all tasks.\n"
+        expected_out = ""
+        tasks = []
+        for i in range(12):
+            t = MagicMock(spec=task.Task)
+            t.__str__.return_value = str(i)
+            tasks.append(t)
+            if i <= 10:
+                expected_out += str(i) + "\n"
+
+        self.pomodoro_service._pomito_instance\
+            .task_plugin.get_tasks.return_value = tasks
+
         out = self._invoke_command("list")
 
         expect(out.exit_code).to.equal(0)
-        expect(out.output).to.equal(str(self.dummy_task) + "\n")
+        expect(out.output).to.equal(expected_out + more_task_msg)
+
+    def test_list_prints_tasks_matching_filter(self):
+        # TODO
+        pass
+
+    def test_list_star_prints_all_tasks(self):
+        # TODO
+        pass
 
     def test_start_starts_a_pomodoro_session(self):
         self.pomodoro_service.signal_session_started\
