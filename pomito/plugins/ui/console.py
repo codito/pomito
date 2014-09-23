@@ -38,13 +38,14 @@ def pomito_start(task_id):
     pomodoro_service.start_session(tasks[int(task_id)])
 
 @pomito_shell.command("list")
-def pomito_list():
+@click.argument('task_filter', type=str, required=False)
+def pomito_list(task_filter=None):
     """Lists available tasks."""
     pomodoro_service = _get_pomodoro_service()
     tasks = pomodoro_service.get_tasks()
     count = 0
     for t in tasks:
-        if count > 10:
+        if task_filter == None and count > 10:
             click.echo("\nShowing first 10 tasks, use `list *`"\
                        + "to show all tasks.")
             break

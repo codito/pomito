@@ -66,8 +66,21 @@ class ConsoleTests(unittest.TestCase):
         pass
 
     def test_list_star_prints_all_tasks(self):
-        # TODO
-        pass
+        expected_out = ""
+        tasks = []
+        for i in range(12):
+            t = MagicMock(spec=task.Task)
+            t.__str__.return_value = str(i)
+            tasks.append(t)
+            expected_out += str(i) + "\n"
+
+        self.pomodoro_service._pomito_instance\
+            .task_plugin.get_tasks.return_value = tasks
+
+        out = self._invoke_command("list", "*")
+
+        expect(out.exit_code).to.equal(0)
+        expect(out.output).to.equal(expected_out)
 
     def test_start_starts_a_pomodoro_session(self):
         self.pomodoro_service.signal_session_started\
@@ -85,4 +98,5 @@ class ConsoleTests(unittest.TestCase):
         args_list = [command, args] if args is not None else [command]
         out = self.runner.invoke(pomito_shell, args_list,
                                  catch_exceptions=False)
+        print(out.output)
         return out
