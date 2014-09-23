@@ -24,9 +24,13 @@ class ConsoleTests(unittest.TestCase):
         self.pomodoro_service = test_factory.create_fake_service()
         self.console = Console(self.pomodoro_service)
 
-        self.dummy_task = MagicMock(spec=task.Task)
+        self.task_list = []
+        for i in range(12):
+            t = MagicMock(spec=task.Task)
+            t.__str__.return_value = str(i)
+            self.task_list.append(t)
         self.pomodoro_service._pomito_instance\
-            .task_plugin.get_tasks.return_value = [self.dummy_task]
+            .task_plugin.get_tasks.return_value = self.task_list
         self.dummy_callback = Mock()
 
     def tearDown(self):
@@ -44,17 +48,7 @@ class ConsoleTests(unittest.TestCase):
     def test_list_prints_first_ten_available_tasks(self):
         more_task_msg = "\nShowing first 10 tasks, use `list *`"\
             + "to show all tasks.\n"
-        expected_out = ""
-        tasks = []
-        for i in range(12):
-            t = MagicMock(spec=task.Task)
-            t.__str__.return_value = str(i)
-            tasks.append(t)
-            if i <= 10:
-                expected_out += str(i) + "\n"
-
-        self.pomodoro_service._pomito_instance\
-            .task_plugin.get_tasks.return_value = tasks
+        expected_out = "\n".join(map(str, self.task_list[0:11])) + "\n"
 
         out = self._invoke_command("list")
 
@@ -66,16 +60,7 @@ class ConsoleTests(unittest.TestCase):
         pass
 
     def test_list_star_prints_all_tasks(self):
-        expected_out = ""
-        tasks = []
-        for i in range(12):
-            t = MagicMock(spec=task.Task)
-            t.__str__.return_value = str(i)
-            tasks.append(t)
-            expected_out += str(i) + "\n"
-
-        self.pomodoro_service._pomito_instance\
-            .task_plugin.get_tasks.return_value = tasks
+        expected_out = "\n".join(map(str, self.task_list)) + "\n"
 
         out = self._invoke_command("list", "*")
 
