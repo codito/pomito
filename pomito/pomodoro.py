@@ -82,6 +82,10 @@ class Pomodoro(object):
     def get_tasks(self):
         return self._pomito_instance.task_plugin.get_tasks()
 
+    def get_tasks_by_filter(self, task_filter):
+        return self._pomito_instance\
+            .task_plugin.get_tasks_by_filter(task_filter)
+
     def start_session(self, task):
         """Starts a pomodoro session.
 

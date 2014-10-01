@@ -50,6 +50,15 @@ class PomodoroServiceTests(unittest.TestCase):
             ._pomito_instance \
             .task_plugin.get_tasks.assert_called_once_with()
 
+    def test_get_tasks_by_filter_returns_tasks_match_filter(self):
+        self.pomodoro_service.get_tasks_by_filter("dummy_filter")
+
+        self.pomodoro_service \
+            ._pomito_instance \
+            .task_plugin.get_tasks_by_filter \
+            .assert_called_once_with("dummy_filter")
+
+
     def test_start_session_throws_if_no_task_is_provided(self):
         mock_task_plugin = self.pomodoro_service._pomito_instance.task_plugin
         mock_task_plugin.is_valid_task.return_value = False
