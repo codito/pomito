@@ -58,6 +58,22 @@ class FakeMessageDispatcher(object):
         message.send()
 
 
+class FakeTaskPlugin(TaskPlugin):
+    """A fake task plugin which returns pre-defined task list."""
+    task_list = []
+
+    def __init__(self):
+        pass
+
+    def initialize(self):
+        pass
+
+    def get_tasks(self):
+        return self.task_list
+
+    def is_valid_task(self, task):
+        return True
+
 class PomitoTestFactory(object):
     """Creates fake pomodoro framework instances for testing."""
     config_file = None
