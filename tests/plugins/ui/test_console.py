@@ -9,7 +9,7 @@ from sure import expect
 
 from pomito import task
 from pomito.plugins.ui.console import *
-from pomito.test import FakeMessageDispatcher, PomitoTestFactory
+from pomito.test import FakeTaskPlugin, PomitoTestFactory
 
 # pylint: disable=too-many-public-methods, invalid-name, missing-docstring
 class ConsoleTests(unittest.TestCase):
@@ -30,7 +30,9 @@ class ConsoleTests(unittest.TestCase):
             t.__str__.return_value = str(i)
             self.task_list.append(t)
         self.pomodoro_service._pomito_instance\
-            .task_plugin.get_tasks.return_value = self.task_list
+            .task_plugin = FakeTaskPlugin()
+        self.pomodoro_service._pomito_instance\
+            .task_plugin.task_list = self.task_list
         self.dummy_callback = Mock()
 
     def tearDown(self):
@@ -56,8 +58,14 @@ class ConsoleTests(unittest.TestCase):
         expect(out.output).to.equal(expected_out + more_task_msg)
 
     def test_list_prints_tasks_matching_filter(self):
-        # TODO
-        pass
+        expected_task_list = [self.task_list[1], self.task_list[10],
+                              self.task_list[11]]
+        expected_out = "\n".join(map(str, expected_task_list)) + "\n"
+
+        out = self._invoke_command("list", "1")
+
+        expect(out.exit_code).to.equal(0)
+        expect(out.output).to.equal(expected_out)
 
     def test_list_star_prints_all_tasks(self):
         expected_out = "\n".join(map(str, self.task_list)) + "\n"

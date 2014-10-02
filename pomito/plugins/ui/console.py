@@ -42,7 +42,7 @@ def pomito_start(task_id):
 def pomito_list(task_filter=None):
     """Lists available tasks."""
     pomodoro_service = _get_pomodoro_service()
-    tasks = pomodoro_service.get_tasks()
+    tasks = pomodoro_service.get_tasks_by_filter(task_filter)
     count = 0
     for t in tasks:
         if task_filter == None and count > 10:
