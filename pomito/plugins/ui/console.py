@@ -34,8 +34,14 @@ def pomito_shell():
 def pomito_start(task_id):
     """Starts a pomito session."""
     pomodoro_service = _get_pomodoro_service()
-    tasks = pomodoro_service.get_tasks()
+    tasks = list(pomodoro_service.get_tasks())
     pomodoro_service.start_session(tasks[int(task_id)])
+
+@pomito_shell.command("stop")
+def pomito_stop():
+    """Stops a pomito session."""
+    pomodoro_service = _get_pomodoro_service()
+    pomodoro_service.stop_session()
 
 @pomito_shell.command("list")
 @click.argument('task_filter', type=str, required=False)

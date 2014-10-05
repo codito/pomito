@@ -31,8 +31,9 @@ class ConsoleTests(unittest.TestCase):
             self.task_list.append(t)
         self.pomodoro_service._pomito_instance\
             .task_plugin = FakeTaskPlugin()
+        # Task list should be a generator as per TaskPlugin.get_tasks
         self.pomodoro_service._pomito_instance\
-            .task_plugin.task_list = self.task_list
+            .task_plugin.task_list = (t for t in self.task_list)
         self.dummy_callback = Mock()
 
     def tearDown(self):
@@ -86,6 +87,21 @@ class ConsoleTests(unittest.TestCase):
 
         self.pomodoro_service.signal_session_started\
             .disconnect(self.dummy_callback)
+
+    def test_stop_stops_a_pomodoro_session(self):
+        self.pomodoro_service.signal_session_stopped\
+            .connect(self.dummy_callback, weak=False)
+
+        out = self._invoke_command("stop")
+
+        expect(out.exit_code).to.be(0)
+        expect(self.dummy_callback.call_count).to.equal(1)
+
+        self.pomodoro_service.signal_session_stopped\
+            .disconnect(self.dummy_callback)
+
+    def test_stop_shows_message_if_no_active_session(self):
+        pass
 
     def _invoke_command(self, command, args=None):
         args_list = [command, args] if args is not None else [command]
