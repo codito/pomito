@@ -32,6 +32,22 @@ class PomodoroServiceTests(unittest.TestCase):
     def tearDown(self):
         self.pomodoro_service._pomito_instance.exit()
 
+    def test_current_task_none_for_default_pomodoro(self):
+        self.pomodoro_service.current_task.should.be.none
+
+    def test_current_task_is_set_for_running_session(self):
+        self.pomodoro_service.start_session(self.dummy_task)
+
+        self.pomodoro_service.current_task.should.equal(self.dummy_task)
+
+        self.pomodoro_service.stop_session()
+
+    def test_current_task_none_after_session_stop(self):
+        self.pomodoro_service.start_session(self.dummy_task)
+        self.pomodoro_service.stop_session()
+
+        self.pomodoro_service.current_task.should.be.none
+
     def test_get_config_gets_value_for_plugin_and_key(self):
         pass
 

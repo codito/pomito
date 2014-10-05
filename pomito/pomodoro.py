@@ -57,6 +57,7 @@ class Pomodoro(object):
                                          self._update_state)
         # other values = "{short, long}_break", "interruption"
         self._timer_type = "session"
+        self.current_task = None
 
     def _stop_timer(self):
         # TODO cleanup: decorator for stop* methods. Similar method for start*
@@ -109,6 +110,7 @@ class Pomodoro(object):
     def stop_session(self):
         """Stops a pomodoro session."""
         self._stop_timer()
+        self.current_task = None
 
     def start_break(self):
         """Starts a break on completion of a session.
