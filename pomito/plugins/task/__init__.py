@@ -36,6 +36,22 @@ class TaskPlugin(metaclass=abc.ABCMeta):
                 if task_filter in str(task):
                     yield task
 
+    def get_task_by_id(self, task_id):
+        """Gets a task with matching task_id-ish.
+
+        Args:
+            task_id: string. substring in Task id matched from left.
+            Like commit-ish in case of git.
+        """
+        tasks = []
+        for tsk in self.get_tasks():
+            if str(tsk.id).startswith(str(task_id)):
+                tasks.append(tsk)
+        if len(tasks) > 1:
+            raise ValueError("Found {0} tasks matching id {1}."\
+                             .format(len(tasks), task_id))
+        return None if len(tasks) == 0 else tasks[0]
+
     @abc.abstractmethod
     def is_valid_task(self, task):
         """Validate a task. Return true if the task is valid.
