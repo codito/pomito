@@ -60,14 +60,21 @@ class AsanaTests(unittest.TestCase):
         get_asana_api.assert_called_with("dummy_key")
 
     def test_initialize_does_not_throw_for_no_config(self):
-        test_factory = PomitoTestFactory()
-        test_factory.config_file = None
-        pomodoro_service = test_factory.create_fake_service()
+        # Set _get_asana_api as None to ensure initialize throws
+        a = AsanaTask(self.pomodoro_service, None)
 
-        expect(self.asana.initialize).when.called.to_not.throw()
+        expect(a.initialize).when.called.to_not.throw()
+
+    def test_initialize_does_not_throw_for_default_get_asana_api(self):
+        a = AsanaTask(self.pomodoro_service)
+
+        expect(a.initialize).when.called.to_not.throw()
 
     def test_get_tasks_does_not_throw_without_initialize(self):
-        expect(self.asana.get_tasks).when.called.to_not.throw()
+        # Set asana_api as None so that AttributeError is thrown
+        x = lambda: list(self.asana.get_tasks())
+
+        expect(x).when.called.to_not.throw()
 
     def test_get_tasks_returns_list_of_task_objects(self):
         self.asana_api.list_workspaces\
@@ -119,3 +126,9 @@ class AsanaTests(unittest.TestCase):
         tasks = list(self.asana.get_tasks())
 
         expect(tasks).to.equal([])
+
+    def test_is_valid_task_throws_not_implemented_error(self):
+        self.asana.initialize()
+
+        expect(self.asana.is_valid_task).when\
+            .called_with(None).to.throw(NotImplementedError)
