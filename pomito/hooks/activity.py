@@ -59,13 +59,13 @@ class ActivityHook(Hook):
         return wrapper
 
     @handler(category="break")
-    def handle_break_stopped(self, *args, **kwargs): pass
+    def handle_break_stopped(self, *args, **kwargs): pass # pragma: no cover
 
     @handler(category="session")
-    def handle_session_stopped(self, *args, **kwargs): pass
+    def handle_session_stopped(self, *args, **kwargs): pass # pragma: no cover
 
     @handler(category="interruption")
-    def handle_interruption_stopped(self, *args, **kwargs): pass
+    def handle_interruption_stopped(self, *args, **kwargs): pass # pragma: no cover
 
 
 class ActivityModel(Model):
