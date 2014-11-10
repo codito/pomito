@@ -94,6 +94,12 @@ Type 'help' or '?' to list available commands."
         except SystemExit:
             return
 
+    def completenames(self, text, *ignored):
+        import sys
+        cmdname = "pomito_" + text
+        return [c[7:] for c in dir(sys.modules[__name__])\
+                if c.startswith(cmdname) and not c.endswith("shell")]
+
     def precmd(self, line):
         return "parse {0}".format(line)
 

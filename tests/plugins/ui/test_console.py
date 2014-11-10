@@ -40,6 +40,18 @@ class ConsoleTests(unittest.TestCase):
         # pylint: disable=protected-access
         self.pomodoro_service._pomito_instance.exit()
 
+    def test_completenames_should_list_matching_commands(self):
+        names = self.console.completenames("st")
+        expect(names).to.equal(["start", "stop"])
+
+    def test_completenames_should_not_list_not_match_commands(self):
+        names = self.console.completenames("nonexist")
+        expect(names).to.equal([])
+
+    def test_completenames_should_not_list_shell(self):
+        names = self.console.completenames("")
+        expect(names).to_not.contain("shell")
+
     def test_shell_text_should_be_pomito(self):
         expect(self.console.prompt).to.equal("pomito> ")
 
