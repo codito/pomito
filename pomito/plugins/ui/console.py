@@ -58,6 +58,10 @@ def pomito_list(task_filter=None):
         click.echo(t)
         count += 1
 
+@pomito_shell.command("quit")
+def pomito_quit():
+    pass
+
 class Console(ui.UIPlugin, cmd.Cmd):
     """Interactive shell for pomito app."""
     intro = "Welcome to Pomito shell.\n\
@@ -82,11 +86,6 @@ Type 'help' or '?' to list available commands."
         print("stop     Stop the currently running session")
         print("quit     Quit the application")
         return
-
-    def do_quit(self, args):
-        """Quit the shell."""
-        print("Good bye!")
-        return False
 
     def do_parse(self, args):
         try:
@@ -139,6 +138,5 @@ Type 'help' or '?' to list available commands."
             self.cmdloop()
         except KeyboardInterrupt:
             self._print_message("Got keyboard interrupt.")
-            self.do_quit(None)
         return
 

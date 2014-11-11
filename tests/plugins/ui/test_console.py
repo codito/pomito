@@ -115,6 +115,10 @@ class ConsoleTests(unittest.TestCase):
     def test_stop_shows_message_if_no_active_session(self):
         pass
 
+    def test_quit_does_not_raise_exception(self):
+        out = self._invoke_command("quit")
+        expect(out.exit_code).to.be(0)
+
     def _invoke_command(self, command, args=None):
         args_list = [command, args] if args is not None else [command]
         out = self.runner.invoke(pomito_shell, args_list,
