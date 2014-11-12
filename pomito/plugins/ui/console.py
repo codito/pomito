@@ -60,6 +60,7 @@ def pomito_list(task_filter=None):
 
 @pomito_shell.command("quit")
 def pomito_quit():
+    # TODO Make this return click context exit
     pass
 
 class Console(ui.UIPlugin, cmd.Cmd):
@@ -72,6 +73,7 @@ Type 'help' or '?' to list available commands."
     prompt = "pomito> "
 
     def __init__(self, pomodoro_service):
+        self._stop_signalled = False
         self._message_queue = []
         _set_pomodoro_service(pomodoro_service)
         cmd.Cmd.__init__(self)
@@ -91,6 +93,7 @@ Type 'help' or '?' to list available commands."
         try:
             pomito_shell.main(args=args.split())
         except SystemExit:
+            self._stop_signalled = True
             return
 
     def completenames(self, text, *ignored):
@@ -103,9 +106,9 @@ Type 'help' or '?' to list available commands."
         return "parse {0}".format(line)
 
     def postcmd(self, stop, line):
-        if line == "quit":
-            stop = True
-        return stop
+        if line == "parse quit":
+            return True
+        return self._stop_signalled
 
     def _print_message(self, msg):
         print(msg)
