@@ -115,9 +115,13 @@ class ConsoleTests(unittest.TestCase):
     def test_stop_shows_message_if_no_active_session(self):
         pass
 
-    def test_quit_does_not_raise_exception(self):
+    def test_quit_should_return_exit_code_one(self):
         out = self._invoke_command("quit")
-        expect(out.exit_code).to.be(0)
+        expect(out.exit_code).to.be(1)
+
+    def test_quit_should_print_exit_message(self):
+        out = self._invoke_command("quit")
+        expect(out.output).to.equal("Good bye!\n")
 
     def _invoke_command(self, command, args=None):
         args_list = [command, args] if args is not None else [command]

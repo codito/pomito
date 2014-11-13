@@ -59,9 +59,10 @@ def pomito_list(task_filter=None):
         count += 1
 
 @pomito_shell.command("quit")
-def pomito_quit():
-    # TODO Make this return click context exit
-    pass
+@click.pass_context
+def pomito_quit(ctx):
+    click.echo("Good bye!")
+    ctx.exit(1)
 
 class Console(ui.UIPlugin, cmd.Cmd):
     """Interactive shell for pomito app."""
@@ -92,8 +93,9 @@ Type 'help' or '?' to list available commands."
     def do_parse(self, args):
         try:
             pomito_shell.main(args=args.split())
-        except SystemExit:
-            self._stop_signalled = True
+        except SystemExit as e:
+            if e.code == 1:
+                self._stop_signalled = True
             return
 
     def completenames(self, text, *ignored):
@@ -106,8 +108,6 @@ Type 'help' or '?' to list available commands."
         return "parse {0}".format(line)
 
     def postcmd(self, stop, line):
-        if line == "parse quit":
-            return True
         return self._stop_signalled
 
     def _print_message(self, msg):
