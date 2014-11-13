@@ -123,6 +123,14 @@ class ConsoleTests(unittest.TestCase):
         out = self._invoke_command("quit")
         expect(out.output).to.equal("Good bye!\n")
 
+    def test_eof_should_return_exit_code_one(self):
+        out = self._invoke_command("EOF")
+        expect(out.exit_code).to.be(1)
+
+    def test_eof_should_print_exit_message(self):
+        out = self._invoke_command("EOF")
+        expect(out.output).to.equal("Good bye!\n")
+
     def _invoke_command(self, command, args=None):
         args_list = [command, args] if args is not None else [command]
         out = self.runner.invoke(pomito_shell, args_list,

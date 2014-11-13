@@ -31,21 +31,21 @@ def pomito_shell():
 
 @pomito_shell.command("start")
 @click.argument('task_id', type=int)
-def pomito_start(task_id):
+def _pomito_start(task_id):
     """Starts a pomito session."""
     pomodoro_service = _get_pomodoro_service()
     tasks = list(pomodoro_service.get_tasks())
     pomodoro_service.start_session(tasks[int(task_id)])
 
 @pomito_shell.command("stop")
-def pomito_stop():
+def _pomito_stop():
     """Stops a pomito session."""
     pomodoro_service = _get_pomodoro_service()
     pomodoro_service.stop_session()
 
 @pomito_shell.command("list")
 @click.argument('task_filter', type=str, required=False)
-def pomito_list(task_filter=None):
+def _pomito_list(task_filter=None):
     """Lists available tasks."""
     pomodoro_service = _get_pomodoro_service()
     tasks = pomodoro_service.get_tasks_by_filter(task_filter)
@@ -60,7 +60,13 @@ def pomito_list(task_filter=None):
 
 @pomito_shell.command("quit")
 @click.pass_context
-def pomito_quit(ctx):
+def _pomito_quit(ctx):
+    click.echo("Good bye!")
+    ctx.exit(1)
+
+@pomito_shell.command("EOF")
+@click.pass_context
+def __pomito_eof(ctx):
     click.echo("Good bye!")
     ctx.exit(1)
 
@@ -100,9 +106,9 @@ Type 'help' or '?' to list available commands."
 
     def completenames(self, text, *ignored):
         import sys
-        cmdname = "pomito_" + text
-        return [c[7:] for c in dir(sys.modules[__name__])\
-                if c.startswith(cmdname) and not c.endswith("shell")]
+        cmdname = "_pomito_" + text
+        return [c[8:] for c in dir(sys.modules[__name__])\
+                if c.startswith(cmdname)]
 
     def precmd(self, line):
         return "parse {0}".format(line)
