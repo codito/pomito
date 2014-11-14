@@ -45,7 +45,7 @@ class TaskPlugin(metaclass=abc.ABCMeta):
         """
         tasks = []
         for tsk in self.get_tasks():
-            if str(tsk.id).startswith(str(task_id)):
+            if str(tsk.uid).startswith(str(task_id)):
                 tasks.append(tsk)
         if len(tasks) > 1:
             raise ValueError("Found {0} tasks matching id {1}."\

@@ -15,7 +15,7 @@ class TaskPluginTests(unittest.TestCase):
         self.task_list = []
         for i in range(12):
             t = MagicMock(spec=task.Task)
-            t.id = 100982 + 10 * i
+            t.uid = 100982 + 10 * i
             t.__str__.return_value = str(i)
             self.task_list.append(t)
         self.taskPlugin.task_list = (t for t in self.task_list)
