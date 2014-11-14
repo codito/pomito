@@ -81,11 +81,28 @@ class Pomodoro(object):
         return DATA_DIR
 
     def get_tasks(self):
+        """Gets all tasks in the current task plugin."""
         return self._pomito_instance.task_plugin.get_tasks()
 
     def get_tasks_by_filter(self, task_filter):
+        """Gets all tasks with attributes matching a filter.
+
+        Args:
+            task_filter: string to match task attributes
+
+        See TaskPlugin.get_tasks_by_filter."""
         return self._pomito_instance\
             .task_plugin.get_tasks_by_filter(task_filter)
+
+    def get_task_by_id(self, task_id):
+        """Gets all tasks with id matching task id.
+
+        Args:
+            task_id: int to match task id
+
+        See TaskPlugin.get_task_by_id."""
+        return self._pomito_instance\
+            .task_plugin.get_task_by_id(task_id)
 
     def start_session(self, task):
         """Starts a pomodoro session.

@@ -74,6 +74,13 @@ class PomodoroServiceTests(unittest.TestCase):
             .task_plugin.get_tasks_by_filter \
             .assert_called_once_with("dummy_filter")
 
+    def test_get_task_by_id_returns_task_matching_task_idish(self):
+        self.pomodoro_service.get_task_by_id(10)
+
+        self.pomodoro_service \
+            ._pomito_instance \
+            .task_plugin.get_task_by_id \
+            .assert_called_once_with(10)
 
     def test_start_session_throws_if_no_task_is_provided(self):
         mock_task_plugin = self.pomodoro_service._pomito_instance.task_plugin
