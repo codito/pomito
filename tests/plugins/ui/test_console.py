@@ -27,6 +27,7 @@ class ConsoleTests(unittest.TestCase):
         self.task_list = []
         for i in range(12):
             t = MagicMock(spec=task.Task)
+            t.uid = i
             t.__str__.return_value = str(i)
             self.task_list.append(t)
         self.pomodoro_service._pomito_instance\

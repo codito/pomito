@@ -34,8 +34,8 @@ def pomito_shell():
 def _pomito_start(task_id):
     """Starts a pomito session."""
     pomodoro_service = _get_pomodoro_service()
-    tasks = list(pomodoro_service.get_tasks())
-    pomodoro_service.start_session(tasks[int(task_id)])
+    task = pomodoro_service.get_task_by_id(task_id)
+    pomodoro_service.start_session(task)
 
 @pomito_shell.command("stop")
 def _pomito_stop():
@@ -61,12 +61,14 @@ def _pomito_list(task_filter=None):
 @pomito_shell.command("quit")
 @click.pass_context
 def _pomito_quit(ctx):
+    """Quit pomito shell."""
     click.echo("Good bye!")
     ctx.exit(1)
 
 @pomito_shell.command("EOF")
 @click.pass_context
 def __pomito_eof(ctx):
+    """Quit pomito shell for ^D."""
     click.echo("Good bye!")
     ctx.exit(1)
 
@@ -88,15 +90,8 @@ Type 'help' or '?' to list available commands."
     def initialize(self):
         pass
 
-    def do_help(self, args):
-        print("List of commands:")
-        print("?/help   Show this help")
-        print("start    Start a session")
-        print("stop     Stop the currently running session")
-        print("quit     Quit the application")
-        return
-
     def do_parse(self, args):
+        """Parse pomito shell commands."""
         try:
             pomito_shell.main(args=args.split())
         except SystemExit as e:
