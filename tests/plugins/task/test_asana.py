@@ -126,9 +126,3 @@ class AsanaTests(unittest.TestCase):
         tasks = list(self.asana.get_tasks())
 
         expect(tasks).to.equal([])
-
-    def test_is_valid_task_throws_not_implemented_error(self):
-        self.asana.initialize()
-
-        expect(self.asana.is_valid_task).when\
-            .called_with(None).to.throw(NotImplementedError)

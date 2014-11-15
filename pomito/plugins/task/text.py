@@ -36,9 +36,6 @@ class TextTask(task.TaskPlugin):
     def get_tasks(self):
         return self.tasks
 
-    def is_valid_task(self, task):
-        return True if type(task) == pomito.task.Task else False
-
     def parse_task(self, task):
         return TextTask.parse_task(task)
 

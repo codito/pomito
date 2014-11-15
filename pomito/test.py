@@ -71,9 +71,6 @@ class FakeTaskPlugin(TaskPlugin):
     def get_tasks(self):
         return self.task_list
 
-    def is_valid_task(self, task):
-        return True
-
 class PomitoTestFactory(object):
     """Creates fake pomodoro framework instances for testing."""
     config_file = None
@@ -91,7 +88,6 @@ class PomitoTestFactory(object):
                              self.message_dispatcher)
         pomito.ui_plugin = Mock(spec=UIPlugin)
         pomito.task_plugin = MagicMock(spec=TaskPlugin)
-        pomito.task_plugin.is_valid_task.return_value = True
 
         def create_fake_timer(duration, callback, interval=0.1):
             """Create a fake timer."""

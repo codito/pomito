@@ -84,8 +84,6 @@ class PomodoroServiceTests(unittest.TestCase):
 
     def test_start_session_throws_if_no_task_is_provided(self):
         mock_task_plugin = self.pomodoro_service._pomito_instance.task_plugin
-        mock_task_plugin.is_valid_task.return_value = False
-
         self.pomodoro_service \
             .start_session.when \
             .called_with(None) \

@@ -50,6 +50,3 @@ class AsanaTask(task.TaskPlugin):
                                self.asana_api.list_tasks(workspace['id'], "me"))
         except AttributeError as attrib_error:
             logger.error("Error getting tasklist: {0}".format(attrib_error))
-
-    def is_valid_task(self, input_task):
-        raise NotImplementedError

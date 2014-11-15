@@ -51,12 +51,3 @@ class TaskPlugin(metaclass=abc.ABCMeta):
             raise ValueError("Found {0} tasks matching id {1}."\
                              .format(len(tasks), task_id))
         return None if len(tasks) == 0 else tasks[0]
-
-    @abc.abstractmethod
-    def is_valid_task(self, task):
-        """Validate a task. Return true if the task is valid.
-
-        Args:
-            task: Task object.
-        """
-        pass

@@ -110,13 +110,13 @@ class Pomodoro(object):
         Args:
             task: Task - A task object, to be performed during this session
         """
-        if not self._pomito_instance.task_plugin.is_valid_task(task):
+        if task is None:
             raise Exception("Cannot start a session without a valid task!")
 
         self.current_task = task
         self._timer_type = "session"
         self._timer = self._create_timer(self._pomito_instance.session_duration,
-                            self._update_state)
+                                         self._update_state)
         msg = Message(self.signal_session_started,
                       session_count=self._session_count,
                       session_duration=self._pomito_instance.session_duration,
