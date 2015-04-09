@@ -2,3 +2,5 @@
 pylint
 pudb
 nose-pudb
+flake8
+flake8-pep257
