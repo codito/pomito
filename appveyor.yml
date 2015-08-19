@@ -8,26 +8,22 @@ init:
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
 install:
-  - ps: >-
-       cinst wget -x86
-       & wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
+  - ps: cinst wget -x86
+  - ps: wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
+  - ps: $env:path
+  - ps: "& $env:temp/pyqt5_install.exe /S"
+  - ps: "Wait-Process -Name pyqt5_install -Timeout 600"
+  - ps: "Get-Process -Name p*"
+  - ps: if (Test-Path 'HKLM:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.3\InstallPath' }
+  - ps: if (Test-Path 'HKCU:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.3\InstallPath' }
+  - ps: if (Test-Path 'HKLM:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.4\InstallPath' }
+  - ps: if (Test-Path 'HKCU:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.4\InstallPath' }
 
-       $env:path
-
-       & $env:temp/pyqt5_install.exe /S
-       Wait-Process -Name pyqt5_install -Timeout 600
-
-       Get-Process -Name p*
-
-       if (Test-Path 'HKLM:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.3\InstallPath' }
-       if (Test-Path 'HKCU:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.3\InstallPath' }
-       if (Test-Path 'HKLM:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.4\InstallPath' }
-       if (Test-Path 'HKCU:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.4\InstallPath' }
-
-       python --version
-       python -c "import struct; print(struct.calcsize('P') * 8)"
-       python -c "import PyQt5"
-       pip --version
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "python -c \"import PyQt5\""
+  - "pip --version"
 
 build_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
