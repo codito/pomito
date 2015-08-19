@@ -11,7 +11,7 @@ init:
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
 install:
-  - ps: Start-FileDownload "http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -FileName $env:temp/pyqt5_install.exe
+  - ps: Start-FileDownload "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -FileName $env:temp/pyqt5_install.exe
   - ps: "& $env:temp/pyqt5_install.exe /S"
   - ps: "Wait-Process -Name pyqt5_install -Timeout 600"
 
