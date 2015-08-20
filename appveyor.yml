@@ -13,7 +13,7 @@ install:
   - ps: if (Test-Path "$env:temp\pyqt5_install.exe") { Remove-Item "$env:temp\pyqt5_install.exe" -Verbose }
   - ps: wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
   - ps: ls "$env:temp\pyqt5_install.exe"
-  - ps: & "C:\\ProgramData\\chocolatey\\tools\\7z.exe" x "$env:temp\pyqt5_install.exe" -oC:\Python34 -r
+  - ps: C:\\ProgramData\\chocolatey\\tools\\7z.exe x "$env:temp\pyqt5_install.exe" -oC:\Python34 -r
   - ps: ls -name "C:\\Python34\\Lib\\site-packages"
   - ps: ls -name "C:\\Python34\\Lib\\site-packages\\PyQt5"
   - ps: Set-Content -Path "C:\\Python34\\Lib\\site-packages\\PyQt5\\pyuic5.bat" -Value "C:\\Python34\\python.exe -m PyQt5.uic.pyuic %1 %2 %3 %4 %5 %6 %7 %8 %9"
