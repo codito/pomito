@@ -10,14 +10,8 @@ init:
 install:
   - ps: cinst wget -x86
   - ps: wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
-  - ps: $env:path
-  - ps: "& $env:temp/pyqt5_install.exe /S"
-  - ps: "Wait-Process -Name pyqt5_install -Timeout 1200"
+  - ps: 7z x $env:temp\pyqt5_install.exe -oC:\Python34 -r
   - ps: ls -name "C:\\Python34\\Lib\\site-packages"
-  - ps: if (Test-Path 'HKLM:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.3\InstallPath' }
-  - ps: if (Test-Path 'HKCU:\Software\PyQt5\Py3.3\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.3\InstallPath' }
-  - ps: if (Test-Path 'HKLM:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKLM:\Software\PyQt5\Py3.4\InstallPath' }
-  - ps: if (Test-Path 'HKCU:\Software\PyQt5\Py3.4\InstallPath') { Get-ItemProperty 'HKCU:\Software\PyQt5\Py3.4\InstallPath' }
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
