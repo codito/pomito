@@ -8,6 +8,7 @@ init:
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
 install:
+  - ps: cinst 7zip.commandline 
   - ps: cinst wget -x86
   - ps: if (Test-Path "$env:temp\pyqt5_install.exe") { Remove-Item "$env:temp\pyqt5_install.exe" -Verbose }
   - ps: wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
