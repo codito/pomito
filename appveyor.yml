@@ -13,7 +13,7 @@ install:
   - ps: if (Test-Path "$env:temp\pyqt5_install.exe") { Remove-Item "$env:temp\pyqt5_install.exe" -Verbose }
   - ps: wget.exe -q "http://downloads.sourceforge.net/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe" -O $env:temp/pyqt5_install.exe
   - ps: ls "$env:temp\pyqt5_install.exe"
-  - ps: $7zipExe = $(ls -recursive -include 7z.exe c:\programdata\chocolatey)[0].FullName
+  - ps: $7zipExe = $(ls -recurse -include 7z.exe c:\programdata\chocolatey)[0].FullName
   - ps: $7zipExe x $env:temp\pyqt5_install.exe -oC:\\Python34 -r
   - ps: ls -name "C:\\Python34\\Lib\\site-packages"
   - ps: ls -name "C:\\Python34\\Lib\\site-packages\\PyQt5"
