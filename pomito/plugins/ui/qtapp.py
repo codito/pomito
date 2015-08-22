@@ -190,7 +190,6 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.initialize()
 
     def initialize(self):
-        import pudb; pudb.set_trace()
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.reset_timer(True)
         self.update_activity_label(None)
