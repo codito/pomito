@@ -5,15 +5,17 @@
 import unittest
 from unittest.mock import Mock
 
+import blinker
+import sure
 from peewee import SqliteDatabase
 
-import sure
+from pomito import main
+from pomito.plugins.ui import UIPlugin
+from pomito.plugins.task import TaskPlugin
 
 class MessageTests(unittest.TestCase):
     def test_send_calls_signal_send_with_kwargs(self):
-        from pomito import main
-        from blinker import Signal
-        mock_signal = Mock(Signal)
+        mock_signal = Mock(blinker.Signal)
         msg = main.Message(mock_signal, arg1="arg1", arg2=1)
 
         msg.send()
@@ -23,8 +25,6 @@ class MessageTests(unittest.TestCase):
 
 class MessageDispatcherTests(unittest.TestCase):
     def setUp(self):
-        from pomito import main
-        import blinker
         dummy_signal = blinker.signal('dummy_signal')
         self.test_message = main.Message(dummy_signal, arg1="arg1", arg2=1)
         self.dispatcher = main.MessageDispatcher()
@@ -112,10 +112,10 @@ class PomitoTests(unittest.TestCase):
         test_factory.create_patch(self, 'os.path', os_module.path)
         test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
-        from pomito import main
         dummy_db = SqliteDatabase(':memory:')
         self.main = main
         self.pomito = main.Pomito(database=dummy_db)
+        self._setup_pomito_plugins(self.pomito)
 
     def test_default_settings(self):
         self.pomito.session_duration.should.be.equal(25 * 60)
@@ -125,10 +125,11 @@ class PomitoTests(unittest.TestCase):
 
     def test_default_plugins(self):
         self.pomito._plugins['task'].should.be.equal('text')
-        self.pomito._plugins['ui'].should.be.equal('console')
+        self.pomito._plugins['ui'].should.be.equal('qtapp')
 
     def test_initialize_creates_database_if_not_present(self):
         pomito = self.main.Pomito()
+        self._setup_pomito_plugins(pomito)
 
         pomito.initialize()
 
@@ -137,6 +138,7 @@ class PomitoTests(unittest.TestCase):
     def test_initialize_uses_injected_database(self):
         dummy_db = SqliteDatabase(':memory:')
         pomito = self.main.Pomito(database=dummy_db)
+        self._setup_pomito_plugins(pomito)
 
         pomito.initialize()
 
@@ -149,3 +151,7 @@ class PomitoTests(unittest.TestCase):
         import configparser
 
         self.pomito.get_parser().should.be.a(configparser.SafeConfigParser)
+
+    def _setup_pomito_plugins(self, pomito):
+        pomito.ui_plugin = Mock(spec=UIPlugin)
+        pomito.task_plugin = Mock(spec=TaskPlugin)

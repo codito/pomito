@@ -58,7 +58,7 @@ class PomitoApp(QtWidgets.QApplication):
             prototype = WINFUNCTYPE(c_bool, c_int, c_int)
             paramflags = (1, 'hWnd', 0), (1, 'id', 0)
             self.UnregisterHotKey = prototype(('UnregisterHotKey', windll.user32), paramflags)
-            return
+        return
 
     def initialize(self, pomodoro_service):
         self._pomodoro_service = pomodoro_service
@@ -76,7 +76,7 @@ class PomitoApp(QtWidgets.QApplication):
                                 0x1, 0x0003, 0x50)
             self.RegisterHotKey(TaskbarList.getptr(self._timer_window.winId()),
                                 0x2, 0x0003, 0x49)
-            return
+        return
 
     def run(self):
         self._timer_window.show()
@@ -190,6 +190,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.initialize()
 
     def initialize(self):
+        import pudb; pudb.set_trace()
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.reset_timer(True)
         self.update_activity_label(None)

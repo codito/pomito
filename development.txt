@@ -1,6 +1,7 @@
 -r requirements.txt
+flake8
+flake8-pep257
 pylint
 pudb
 nose-pudb
-flake8
-flake8-pep257
+nose-watcher

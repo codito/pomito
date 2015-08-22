@@ -130,7 +130,7 @@ class Pomito(object):
         self.short_break_duration = 5 * 60   # Duration of a short break between two sessions
         self.long_break_duration = 15 * 60   # Duration of a longer break after every 4 sessions
         self.long_break_frequency = 4        # Frequency of long breaks
-        self._plugins['ui'] = 'console'
+        self._plugins['ui'] = 'qtapp'
         self._plugins['task'] = 'text'
 
         self._parse_config_file(self._config_file)
