@@ -32,6 +32,10 @@ def initialize(pomodoro_service):
         from .ui import qtapp
 
         PLUGINS['qtapp'] = qtapp.QtUI(pomodoro_service)
+    else:
+        # CI machines may not have Qt installed, ensure the lookup
+        # doesn't fail
+        PLUGINS['qtapp'] = None
 
 def get_plugin(plugin_name):
     return PLUGINS[plugin_name]
