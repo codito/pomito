@@ -22,6 +22,7 @@ if sys.platform == "win32":
          "platforms\\qwindows.dll"),
         ("pomito\\plugins\\ui\\wintaskbar.tlb", "wintaskbar.tlb"),
     ]
+    base = "Win32GUI"
 
 includefiles += [
     ("docs\\sample_config.ini", "docs\\sample_config.ini"),
