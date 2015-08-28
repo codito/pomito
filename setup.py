@@ -13,7 +13,7 @@ build_qt()
 # Setup cx_freeze packaging
 # pylint: disable=invalid-name
 base = None
-includefiles = None
+includefiles = []
 if sys.platform == "win32":
     from os import path
     pyqt_windows_root = get_pyqt_install_root()
@@ -30,14 +30,14 @@ includefiles += [
 ]
 
 buildOptions = dict(packages=[], excludes=[],
-                    includes=["atexit", "sip",],
+                    includes=["atexit", "sip"],
                     include_files=includefiles)
 
 executables = [Executable('pomito.py', base=base)]
 
 setup(
     name='Pomito',
-    version='0.1.0',
+    version='0.2.0',
     author='Arun Mahapatra',
     packages=['pomito'],
     scripts=['pomito.py'],
