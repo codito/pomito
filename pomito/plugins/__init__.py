@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
-# Pomito - Pomodoro timer on steroids
-# Base package for plugins
+"""
+pomito.plugins package.
+
+Base package for plugins.
+"""
 
 __all__ = ['initialize', 'get_plugin']
 
 # TODO Enable plugin discovery, support for drop-in plugins
 # TODO Validate plugins
-# TODO Some plugins may fail to import due to dependencies, gracefully handle them
+# TODO Handle plugins may fail to import due to dependencies
 PLUGINS = {}
 
+
 def initialize(pomodoro_service):
-    """Discover plugins. Every plugin has access to the pomodoro_service layer only.
+    """Discover plugins.
+
+    Every plugin has access to the pomodoro_service layer only.
 
     Args:
-        pomodoro_service pomodoro.Pomodoro - The pomodoro service object
+        pomodoro_service (pomodoro.Pomodoro): The pomodoro service object
     """
     import os
 
@@ -21,12 +27,14 @@ def initialize(pomodoro_service):
     from .task import asana
     from .task import rtm
     from .task import text
+    from .task import nulltask
 
     global PLUGINS
     PLUGINS = {'console': console.Console(pomodoro_service),
                'asana': asana.AsanaTask(pomodoro_service),
                'text': text.TextTask(pomodoro_service),
-               'rtm': rtm.RTMTask(pomodoro_service)}
+               'rtm': rtm.RTMTask(pomodoro_service),
+               'nulltask': nulltask.NullTask(pomodoro_service)}
 
     if os.environ.get("POMITO_TEST") is None:
         from .ui import qtapp
@@ -37,5 +45,11 @@ def initialize(pomodoro_service):
         # doesn't fail
         PLUGINS['qtapp'] = None
 
+
 def get_plugin(plugin_name):
+    """Get a plugin by name.
+
+    Args:
+        plugin_name (string): name of the plugin.
+    """
     return PLUGINS[plugin_name]

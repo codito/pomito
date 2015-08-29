@@ -85,8 +85,6 @@ class PomitoTests(unittest.TestCase):
     """
     TODO
     default: durations for session, breaks
-    default: ui plugin is console
-    default: task plugin is text
     default: config is parsed appropriately
 
     run: returns for invalid state
@@ -124,7 +122,7 @@ class PomitoTests(unittest.TestCase):
         self.pomito.long_break_frequency.should.be.equal(4)
 
     def test_default_plugins(self):
-        self.pomito._plugins['task'].should.be.equal('text')
+        self.pomito._plugins['task'].should.be.equal('nulltask')
         self.pomito._plugins['ui'].should.be.equal('qtapp')
 
     def test_initialize_creates_database_if_not_present(self):

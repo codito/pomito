@@ -7,7 +7,7 @@ class TaskPlugin(metaclass=abc.ABCMeta):
     """Defines the contract for all Task plugins."""
 
     def __init__(self):
-        raise NotImplementedError
+        pass
 
     @abc.abstractmethod
     def initialize(self):
