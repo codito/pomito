@@ -1,7 +1,6 @@
 -r requirements.txt
 flake8
 flake8-pep257
-pylint
 pudb
 nose-pudb
 nose-watcher
