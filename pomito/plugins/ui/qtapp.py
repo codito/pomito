@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-# Pomito - Pomodoro timer on steroids
-# Implementation of Qt user interface
+"""
+Pomito - Pomodoro timer on steroids.
 
+Implementation of Qt user interface.
+"""
 
 import logging
 import sys
@@ -13,7 +15,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 QtCore.Signal = QtCore.pyqtSignal
 QtCore.Slot = QtCore.pyqtSlot
 
-#import pomito_rc
 logger = logging.getLogger("pomito.plugins.ui.qtapp")
 
 from .qt_timer import Ui_MainWindow
@@ -433,7 +434,11 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
         tasks = list(self._service.get_tasks())
         self._taskmodel.updateTasks(tasks)
         self._apply_task_filter("")
-        self.show()
+        if len(tasks) > 0:
+            self.show()
+        else:
+            logger.debug("Task plugin didn't find any tasks to show.")
+            self.list_task_selected(None)
         return
 
     def _apply_task_filter(self, text):
