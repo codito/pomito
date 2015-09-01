@@ -7,6 +7,8 @@ import threading
 import blinker
 
 from .main import Message
+from .plugins import get_plugin, get_plugins
+from .plugins.task import TaskPlugin
 
 logger = logging.getLogger('pomito.service')
 
@@ -79,6 +81,11 @@ class Pomodoro(object):
         """Gets the data directory for pomito application."""
         from .main import DATA_DIR
         return DATA_DIR
+
+    def get_task_plugins(self):
+        """Gets list of all registered task plugins."""
+        plugins = get_plugins().items()
+        return [v for k, v in plugins if isinstance(get_plugin(k), TaskPlugin)]
 
     def get_tasks(self):
         """Gets all tasks in the current task plugin."""

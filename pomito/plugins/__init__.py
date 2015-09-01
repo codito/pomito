@@ -53,3 +53,8 @@ def get_plugin(plugin_name):
         plugin_name (string): name of the plugin.
     """
     return PLUGINS[plugin_name]
+
+
+def get_plugins():
+    """Get all plugins."""
+    return PLUGINS
