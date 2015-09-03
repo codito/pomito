@@ -56,3 +56,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Local peewee.db
+peewee.db
