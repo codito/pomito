@@ -1,7 +1,7 @@
 """Setup script for pomito."""
 
+import os
 import sys
-from setuptools import setup
 
 from cx_Freeze import setup, Executable
 
@@ -29,22 +29,30 @@ includefiles += [
     ("docs\\sample_todo.txt", "docs\\sample_todo.txt"),
 ]
 
+build_version_major = "0.2"
+build_version_minor = "0-dev"
+if os.getenv("APPVEYOR_BUILD"):
+    build_version_minor = int(os.getenv("APPVEYOR_BUILD_NUMBER")) % 100
+elif os.getenv("TRAVIS_BUILD"):
+    build_version_minor = int(os.getenv("TRAVIS_BUILD_NUMBER")) % 100
+build_version = build_version_major + "." + build_version_minor
+
 buildOptions = dict(packages=[], excludes=[],
                     includes=["atexit", "sip"],
                     include_files=includefiles)
 
-executables = [Executable('pomito.py', base=base)]
+executables = [Executable("pomito.py", base=base)]
 
 setup(
-    name='Pomito',
-    version='0.2.0',
-    author='Arun Mahapatra',
-    packages=['pomito'],
-    scripts=['pomito.py'],
-    url='https://www.github.com/codito/pomito',
-    license='LICENSE',
-    description='Simple pomodoro timer with support for tasks and hooks',
-    long_description=open('README.md').read(),
+    name="Pomito",
+    version=build_version,
+    author="Arun Mahapatra",
+    packages=["pomito"],
+    scripts=["pomito.py"],
+    url="https://www.github.com/codito/pomito",
+    license="LICENSE",
+    description="Simple pomodoro timer with support for tasks and hooks",
+    long_description=open("README.md").read(),
     install_requires=[
         "pywin32",
         "peewee",
@@ -63,11 +71,10 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Utilities",
     ],
-    test_suite='py.test',
+    test_suite="nosetests",
     tests_require=[
         "pyfakefs",
-        "pytest",
-        "pytest-cov",
+        "nose",
         "sure",
     ],
     options=dict(build_exe=buildOptions),
