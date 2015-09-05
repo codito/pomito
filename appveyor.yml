@@ -31,15 +31,16 @@ install:
 build_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
   - pip install -r requirements.txt
-  - ps: python setup.py build > $env:temp/py_setup_build_log.txt
+  - python setup.py build > build/py_setup_build_log.txt
   - cd build/exe.win32-3.4
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
   - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { curl.exe -fsS -u "$env:bintray_user:$env:bintray_key" -X PUT "https://api.bintray.com/content/codito/generic/pomito/$env:APPVEYOR_BUILD_VERSION/$env:pomito_zip" --data-binary @../$env:pomito_zip }
 
 on_finish:
-  - ps: Push-AppVeyorArtifact $env:temp/pyqt_extract_log.txt
-  - ps: Push-AppVeyorArtifact $env:temp/py_setup_build_log.txt
+  - cd /D %APPVEYOR_BUILD_FOLDER%
+  - ps: Push-AppVeyorArtifact "$env:temp/pyqt_extract_log.txt"
+  - ps: Push-AppVeyorArtifact "build/py_setup_build_log.txt"
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
