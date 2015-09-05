@@ -1,22 +1,22 @@
 os: Windows Server 2012 R2
 
 environment:
-    bintray_user:
-        secure: u2gaErEDY6qCasVxS+318Q==
-    bintray_key:
-        secure: 4wMikiVBJ3a6hXGBN7N7iYrntdzgeBEmYsTesxP2sQ0F/YL2MTChs7qHVNXo52pa
+  bintray_user:
+    secure: u2gaErEDY6qCasVxS+318Q==
+  bintray_key:
+    secure: 4wMikiVBJ3a6hXGBN7N7iYrntdzgeBEmYsTesxP2sQ0F/YL2MTChs7qHVNXo52pa
 
 init:
-  - ps: "ls -Name \"C:/\""
-  - ps: "ls -Name \"C:/Program Files/Microsoft SDKs/Windows\""
+  - ps: $env:pyqt_installer="$env:temp\pyqt5_install.exe"
+  - ps: ls -Name "c:\\python*"
   - "SET PATH=\\Python34;\\Python34\\Scripts;%PATH%"
 
 install:
-  - ps: if (Test-Path "$env:temp\pyqt5_install.exe") { Remove-Item "$env:temp\pyqt5_install.exe" -Verbose }
-  - ps: Start-FileDownload https://www.mirrorservice.org/sites/downloads.sourceforge.net/p/py/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe -FileName $env:temp/pyqt5_install.exe
-  - ps: ls "$env:temp\pyqt5_install.exe"
+  - ps: if (Test-Path $env:pyqt_installer) { Remove-Item $env:pyqt_installer -Verbose }
+  - ps: Start-FileDownload https://www.mirrorservice.org/sites/downloads.sourceforge.net/p/py/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe -FileName $env:pyqt_installer
+  - ps: ls $env:pyqt_installer
   - ps: cinst 7zip.commandline
-  - ps: c:\programdata\chocolatey\bin\7z.exe x $env:temp\pyqt5_install.exe -oC:\\Python34 -r > $env:temp/pyqt_extract_log.txt
+  - ps: c:\programdata\chocolatey\bin\7z.exe x $env:temp\pyqt5_install.exe -oC:\\Python34 -r > $env:temp\pyqt_extract_log.txt
   - ps: ls -name "C:\\Python34\\Lib\\site-packages"
   - ps: ls -name "C:\\Python34\\Lib\\site-packages\\PyQt5"
   - ps: Set-Content -Path "C:\\Python34\\Lib\\site-packages\\PyQt5\\pyuic5.bat" -Value "C:\\Python34\\python.exe -m PyQt5.uic.pyuic %1 %2 %3 %4 %5 %6 %7 %8 %9"
@@ -30,8 +30,8 @@ install:
 
 build_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
-  - pip install -r requirements.txt
-  - python setup.py build > build/py_setup_build_log.txt
+  - "pip install -r requirements.txt"
+  - "python setup.py build > build/py_setup_build_log.txt"
   - cd build/exe.win32-3.4
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
@@ -39,8 +39,8 @@ build_script:
 
 on_finish:
   - cd /D %APPVEYOR_BUILD_FOLDER%
-  - ps: Push-AppVeyorArtifact "$env:temp/pyqt_extract_log.txt"
-  - ps: Push-AppVeyorArtifact "build/py_setup_build_log.txt"
+  - ps: $log = "$env:temp/pyqt_extract_log.txt"; if (Test-Path $log) { Push-AppVeyorArtifact $log }
+  - ps: $log = "build/py_setup_build_log.txt"; if (Test-Path $log) { Push-AppVeyorArtifact $log }
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
