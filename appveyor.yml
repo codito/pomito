@@ -1,6 +1,10 @@
 os: Windows Server 2012 R2
 
-deploy: off
+environment:
+    bintray_user:
+        secure: u2gaErEDY6qCasVxS+318Q==
+    bintray_key:
+        secure: 4wMikiVBJ3a6hXGBN7N7iYrntdzgeBEmYsTesxP2sQ0F/YL2MTChs7qHVNXo52pa
 
 init:
   - ps: "ls -Name \"C:/\""
@@ -11,7 +15,7 @@ install:
   - ps: if (Test-Path "$env:temp\pyqt5_install.exe") { Remove-Item "$env:temp\pyqt5_install.exe" -Verbose }
   - ps: Start-FileDownload https://www.mirrorservice.org/sites/downloads.sourceforge.net/p/py/pyqt/PyQt5/PyQt-5.5/PyQt5-5.5-gpl-Py3.4-Qt5.5.0-x32.exe -FileName $env:temp/pyqt5_install.exe
   - ps: ls "$env:temp\pyqt5_install.exe"
-  - ps: cinst 7zip.commandline 
+  - ps: cinst 7zip.commandline
   - ps: c:\programdata\chocolatey\bin\7z.exe x $env:temp\pyqt5_install.exe -oC:\\Python34 -r
   - ps: ls -name "C:\\Python34\\Lib\\site-packages"
   - ps: ls -name "C:\\Python34\\Lib\\site-packages\\PyQt5"
@@ -29,7 +33,9 @@ build_script:
   - "pip install -r requirements.txt"
   - "python setup.py build"
   - cd build/exe.win32-3.4
-  - ps: "& 7z a -r ../pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip ."
+  - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
+  - ps: "& 7z a -r ../$env:pomito_zip ."
+  - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { curl.exe -T build/$env:pomito_zip -u$env:bintray_user:$env:bintray_key https://api.bintray.com/content/codito/generic/pomito/$env:APPVEYOR_BUILD_VERSION/$env:pomito_zip }
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
@@ -37,3 +43,5 @@ test_script:
 
 artifacts:
   - path: build/*.zip
+
+deploy: off
