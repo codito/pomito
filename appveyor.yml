@@ -31,7 +31,8 @@ install:
 build_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
   - "pip install -r requirements.txt"
-  - ps: python setup.py build 2>&1 > $env:temp\py_setup_build_log.txt
+  - "python setup.py build"
+  #- ps: 2>&1 > $env:temp\py_setup_build_log.txt
   - cd build/exe.win32-3.4
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
@@ -40,7 +41,7 @@ build_script:
 on_finish:
   - cd /D %APPVEYOR_BUILD_FOLDER%
   - ps: $log = "$env:temp/pyqt_extract_log.txt"; if (Test-Path $log) { Push-AppVeyorArtifact $log }
-  - ps: $log = "$env:temp/py_setup_build_log.txt"; if (Test-Path $log) { Push-AppVeyorArtifact $log }
+  #- ps: $log = "$env:temp/py_setup_build_log.txt"; if (Test-Path $log) { Push-AppVeyorArtifact $log }
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
