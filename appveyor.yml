@@ -36,7 +36,6 @@ build_script:
   - cd build/exe.win32-3.4
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { $pomito_path = $(Resolve-Path "../$env:pomito_zip"); curl.exe -fsS -k -u "$($env:bintray_user):$env:bintray_key" -X PUT "https://api.bintray.com/content/codito/generic/pomito/$env:APPVEYOR_BUILD_VERSION/$($env:pomito_zip)?publish=1" --data-binary "@$pomito_path" }
 
 on_finish:
