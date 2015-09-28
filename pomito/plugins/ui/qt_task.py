@@ -2,8 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/qt/task.ui'
 #
-# Created: Mon Sep  9 12:29:54 2013
-#      by: PyQt5 UI code generator 5.0.1
+# Created by: PyQt5 UI code generator 5.5
 #
 # WARNING! All changes made in this file will be lost!
 

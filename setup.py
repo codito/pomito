@@ -25,8 +25,8 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 includefiles += [
-    ("docs\\sample_config.ini", "docs\\sample_config.ini"),
-    ("docs\\sample_todo.txt", "docs\\sample_todo.txt"),
+    ("docs/sample_config.ini", "docs/sample_config.ini"),
+    ("docs/sample_todo.txt", "docs/sample_todo.txt"),
 ]
 
 build_version_major = "0.2"
