@@ -3,12 +3,18 @@
 import os
 import sys
 
-from cx_Freeze import setup, Executable
-
 from pre_build import build_qt, get_pyqt_install_root
 
 # Build qt related resources
 build_qt()
+
+# Flag for esky feature
+esky_enabled = True if os.getenv("enable_esky") is not None else False
+if esky_enabled:
+    from distutils.core import setup
+    from esky.bdist_esky import Executable
+else:
+    from cx_Freeze import setup, Executable
 
 # Setup cx_freeze packaging
 # pylint: disable=invalid-name
@@ -37,11 +43,20 @@ elif os.getenv("TRAVIS_BUILD"):
     build_version_minor = int(os.getenv("TRAVIS_BUILD_NUMBER")) % 100
 build_version = build_version_major + "." + build_version_minor
 
-buildOptions = dict(packages=[], excludes=[],
-                    includes=["atexit", "sip"],
-                    include_files=includefiles)
-
-executables = [Executable("pomito.py", base=base)]
+if esky_enabled:
+    executables = [Executable("pomito.py", name="pomito", gui_only=True)]
+    setup_options = {"bdist_esky": {
+        "freezer_module": "cxfreeze",
+        "includes": ["atexit", "sip"],
+        "freezer_options": {"zipIncludes": includefiles}
+    }}
+else:
+    executables = [Executable("pomito.py", base=base)]
+    buildOptions = dict(packages=[], excludes=[],
+                        includes=["atexit", "sip"],
+                        include_files=includefiles,
+                        )
+    setup_options = dict(build_exe=buildOptions)
 
 setup(
     name="Pomito",
@@ -77,6 +92,6 @@ setup(
         "nose",
         "sure",
     ],
-    options=dict(build_exe=buildOptions),
+    options=setup_options,
     executables=executables
 )
