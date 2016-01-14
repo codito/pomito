@@ -8,6 +8,7 @@ from unittest.mock import Mock
 import blinker
 import sure
 from peewee import SqliteDatabase
+from pyfakefs import fake_filesystem
 
 from pomito import main
 from pomito.plugins.ui import UIPlugin
@@ -101,7 +102,6 @@ class PomitoTests(unittest.TestCase):
     """
     def setUp(self):
         from pomito.test import PomitoTestFactory
-        import fake_filesystem
         test_factory = PomitoTestFactory()
 
         # Encapsulate platform concerns

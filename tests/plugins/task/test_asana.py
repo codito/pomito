@@ -3,8 +3,8 @@
 import unittest
 from unittest.mock import Mock, MagicMock, patch
 
-import fake_filesystem
 from asana.asana import AsanaAPI
+from pyfakefs import fake_filesystem
 from sure import expect
 
 from pomito.plugins.task.asana import AsanaTask

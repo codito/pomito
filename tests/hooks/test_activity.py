@@ -9,7 +9,7 @@ from peewee import SqliteDatabase
 from pomito.hooks.activity import ActivityHook, ActivityModel
 from pomito.test import PomitoTestFactory
 
-import fake_filesystem
+from pyfakefs import fake_filesystem
 import sure
 
 class ActivityHookTests(unittest.TestCase):
