@@ -23,6 +23,7 @@ QtCore.Slot = QtCore.pyqtSlot
 logger = logging.getLogger("pomito.plugins.ui.qtapp")
 
 if sys.platform.startswith("win"):
+    import ctypes
     from ctypes import c_bool, c_int, WINFUNCTYPE, windll
     from ctypes.wintypes import UINT
 
@@ -44,8 +45,6 @@ class QtUI(ui.UIPlugin):
 # FIXME: we're accessing UI QObjects in timer callbacks; this may cause cross
 # thread violation.
 class PomitoApp(QtWidgets.QApplication):
-    WM_HOTKEY_MSG = 0x0312
-
     def __init__(self, argv):
         QtWidgets.QApplication.__init__(self, argv)
 
@@ -84,18 +83,6 @@ class PomitoApp(QtWidgets.QApplication):
         self._timer_window.show()
         self.exec_()
         return
-
-    ###
-    # QApplication overrides
-    ###
-    def winEventFilter(self, msg):
-        # XXX PySide bug: QtCore.MSG should contain 'message' member!
-        print(msg.message)
-        if msg.lParam == 0x500003:
-            self._timer_window.btn_timer_clicked(checked=self._timer_window.isChecked, keyboard_context=True)
-        elif msg.lParam == 0x490003:
-            self._timer_window.btn_interrupt_clicked(checked=self._timer_window.isChecked, keyboard_context=True)
-            return
 
 
 class TaskbarList(object):
@@ -393,6 +380,21 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if not self._task_bar is None:
             hwnd = TaskbarList.getptr(self.winId())
             self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_NOPROGRESS)
+
+    ###
+    # QMainWindow overrides
+    ###
+    def nativeEvent(self, eventType, message):
+        WM_HOTKEY_MSG = 0x0312
+        msg = ctypes.wintypes.MSG.from_address(message.__int__())
+        if eventType == "windows_generic_MSG":
+            if msg.message == WM_HOTKEY_MSG:
+                if msg.lParam == 0x500003:
+                    self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
+                elif msg.lParam == 0x490003:
+                    self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+        return False, 0
+
 
 
 class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
