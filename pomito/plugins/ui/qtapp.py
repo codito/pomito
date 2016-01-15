@@ -5,6 +5,11 @@ Pomito - Pomodoro timer on steroids.
 Implementation of Qt user interface.
 """
 
+from .qt_timer import Ui_MainWindow
+from .qt_task import Ui_TaskWindow
+from .qt_interrupt import Ui_InterruptionWindow
+
+import datetime
 import logging
 import sys
 
@@ -16,10 +21,6 @@ QtCore.Signal = QtCore.pyqtSignal
 QtCore.Slot = QtCore.pyqtSlot
 
 logger = logging.getLogger("pomito.plugins.ui.qtapp")
-
-from .qt_timer import Ui_MainWindow
-from .qt_task import Ui_TaskWindow
-from .qt_interrupt import Ui_InterruptionWindow
 
 if sys.platform.startswith("win"):
     from ctypes import c_bool, c_int, WINFUNCTYPE, windll
@@ -131,7 +132,7 @@ class TaskbarList(object):
         pythonapi.PyCapsule_GetPointer.argtypes = [py_object]
 
         # Convert PyCObject to a void pointer
-        #return pythonapi.PyCapsule_GetPointer(pycobject)
+        # return pythonapi.PyCapsule_GetPointer(pycobject)
         return pycobject
 
 
@@ -141,9 +142,9 @@ class QtUtilities:
         """Gets elided text so that the text can fit given rectangle.
 
         Args:
-            rect: Rectangle which will contain the text. Type: QtCore.QRect
-            font: Font used to render text. Type: QtCore.QFont
-            text: String to render
+        rect: Rectangle which will contain the text. Type: QtCore.QRect
+        font: Font used to render text. Type: QtCore.QFont
+        text: String to render
         """
         textLayout = QtGui.QTextLayout(text, font)
         metrics = QtGui.QFontMetrics(font)
@@ -165,7 +166,8 @@ class QtUtilities:
 
         # XXX are we calculating the width correctly?
         return metrics.elidedText(text, QtCore.Qt.ElideRight, totalWidth + rect.width())
-        #return metrics.elidedText(text, QtCore.Qt.ElideRight, totalWidth)
+    #return metrics.elidedText(text, QtCore.Qt.ElideRight, totalWidth)
+
 
 class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, service):
@@ -175,6 +177,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._session_count = 0
         self._session_duration = 0
         self._interrupt_duration = 0
+        self._last_session_timestamp = datetime.datetime.min
 
         # Setup child windows and taskbar
         self._interrupt_window = InterruptWindow(service)
@@ -183,7 +186,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._timer_tray = None
         if QtWidgets.QSystemTrayIcon.isSystemTrayAvailable():
             self._timer_tray = QtWidgets.QSystemTrayIcon(QtGui.QIcon(":/icon_pomito"),
-                                                     parent=self)
+                                                         parent=self)
             self._current_task = None
 
         # Setup user interface from designer
@@ -216,7 +219,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #self._timer_tray.messageClicked.connect(lambda: self.raise_() and self.setFocus())
 
     def reset_timer(self, reset_session):
-        session_count = 0 if reset_session else self._session_count
+        self._session_count = 0 if reset_session else self._session_count
         self.timer_lcd.display("00:00")
         self.update_activity_label(None)
 
@@ -352,10 +355,16 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._task_bar.SetProgressValue(TaskbarList.getptr(self.winId()),
                                             0, self._session_duration)
             if self._timer_tray is not None:
-                self._timer_tray.showMessage("Pomodoro started!", "Stay focused...",
-                                             QtWidgets.QSystemTrayIcon.Information, 500)
+                self._timer_tray\
+                    .showMessage("Pomodoro started!", "Stay focused...",
+                                 QtWidgets.QSystemTrayIcon.Information, 500)
 
     def on_session_stop(self, *args, **kwargs):
+        # Reset session count if this is the first session of the day
+        if self._last_session_timestamp.date != datetime.datetime.now().date:
+            self._session_count = 0
+            self._last_session_timestamp = datetime.datetime.now()
+
         reason = "Ouch! Interrupted."
         if kwargs["reason"] == "complete":
             self._session_count += 1
@@ -370,7 +379,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_PAUSED)
             if self._timer_tray is not None:
                 self._timer_tray.showMessage("Pomodoro ended!", message,
-                        QtWidgets.QSystemTrayIcon.Information, 500)
+                                             QtWidgets.QSystemTrayIcon.Information, 500)
 
     def on_interrupt_start(self, *args, **kwargs):
         return
@@ -423,9 +432,9 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
         self.list_task.doubleClicked.connect(self.list_task_selected)
         self.act_focus_txt.triggered.connect(lambda: self.txt_filter.setFocus())
         self.act_hide_window.triggered.connect(lambda:
-                self.list_task_selected(None))
+                                               self.list_task_selected(None))
         self.act_select_task.triggered.connect(lambda:
-                self.list_task_selected(self.list_task.currentIndex()))
+                                               self.list_task_selected(self.list_task.currentIndex()))
 
         self._apply_task_filter("")
         return
@@ -532,8 +541,8 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
             # second item: draw priority and other meta information
             text_space = inner_rect.adjusted(0, text_space.height() + ver_padding, 0, 0)
             meta_text = QtUtilities.getElidedText(text_space,
-                                                 painter.font(),
-                                                 "Estimate: {0}, Actual: {1}, Tags: {2}".format(data.estimate, data.actual, data.tags))
+                                                  painter.font(),
+                                                  "Estimate: {0}, Actual: {1}, Tags: {2}".format(data.estimate, data.actual, data.tags))
             painter.drawText(text_space,
                              option.displayAlignment | QtCore.Qt.TextWordWrap,
                              meta_text)
