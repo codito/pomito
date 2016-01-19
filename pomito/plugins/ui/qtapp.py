@@ -348,7 +348,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def on_session_stop(self, *args, **kwargs):
         # Reset session count if this is the first session of the day
-        if self._last_session_timestamp.date != datetime.datetime.now().date:
+        if self._last_session_timestamp.date() != datetime.datetime.now().date():
             self._session_count = 0
             self._last_session_timestamp = datetime.datetime.now()
 
