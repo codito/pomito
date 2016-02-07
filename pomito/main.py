@@ -160,6 +160,10 @@ class Pomito(object):
         # Initialize the plugins
         self.ui_plugin.initialize()
         self.task_plugin.initialize()
+
+        # Initialize the hooks
+        for hook in self._hooks:
+            hook.initialize()
         return
 
 

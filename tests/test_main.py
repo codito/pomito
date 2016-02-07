@@ -13,6 +13,7 @@ from pyfakefs import fake_filesystem
 from pomito import main
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
+from pomito.hooks import Hook
 
 class MessageTests(unittest.TestCase):
     def test_send_calls_signal_send_with_kwargs(self):
@@ -114,6 +115,7 @@ class PomitoTests(unittest.TestCase):
         self.main = main
         self.pomito = main.Pomito(database=dummy_db)
         self._setup_pomito_plugins(self.pomito)
+        self._setup_pomito_hooks(self.pomito)
 
     def test_default_settings(self):
         self.pomito.session_duration.should.be.equal(25 * 60)
@@ -125,6 +127,13 @@ class PomitoTests(unittest.TestCase):
         self.pomito._plugins['task'].should.be.equal('nulltask')
         self.pomito._plugins['ui'].should.be.equal('qtapp')
 
+    def test_default_hooks(self):
+        pomito = self.main.Pomito()
+
+        pomito._hooks.should.have.length_of(1)
+        pomito._hooks[0].should.be.a('pomito.hooks.activity.ActivityHook')
+        pomito.exit()
+
     def test_initialize_creates_database_if_not_present(self):
         pomito = self.main.Pomito()
         self._setup_pomito_plugins(pomito)
@@ -132,6 +141,7 @@ class PomitoTests(unittest.TestCase):
         pomito.initialize()
 
         pomito.get_db().shouldnt.be.equal(None)
+        pomito.exit()
 
     def test_initialize_uses_injected_database(self):
         dummy_db = SqliteDatabase(':memory:')
@@ -141,6 +151,19 @@ class PomitoTests(unittest.TestCase):
         pomito.initialize()
 
         pomito.get_db().should.be.equal(dummy_db)
+        pomito.exit()
+
+    def test_initialize_setup_plugins_and_hooks(self):
+        pomito = self.main.Pomito()
+        self._setup_pomito_plugins(pomito)
+        self._setup_pomito_hooks(pomito)
+
+        pomito.initialize()
+
+        pomito.ui_plugin.initialize.call_count.should.be.equal(1)
+        pomito.task_plugin.initialize.call_count.should.be.equal(1)
+        pomito._hooks[0].initialize.call_count.should.be.equal(1)
+        pomito.exit()
 
     def test_get_parser_returns_a_configparser_with_config_data(self):
         pass
@@ -153,3 +176,6 @@ class PomitoTests(unittest.TestCase):
     def _setup_pomito_plugins(self, pomito):
         pomito.ui_plugin = Mock(spec=UIPlugin)
         pomito.task_plugin = Mock(spec=TaskPlugin)
+
+    def _setup_pomito_hooks(self, pomito):
+        pomito._hooks[0] = Mock(spec=Hook)
