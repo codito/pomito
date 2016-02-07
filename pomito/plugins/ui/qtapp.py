@@ -385,16 +385,16 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # QMainWindow overrides
     ###
     def nativeEvent(self, eventType, message):
-        WM_HOTKEY_MSG = 0x0312
-        msg = ctypes.wintypes.MSG.from_address(message.__int__())
-        if eventType == "windows_generic_MSG":
-            if msg.message == WM_HOTKEY_MSG:
-                if msg.lParam == 0x500003:
-                    self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
-                elif msg.lParam == 0x490003:
-                    self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+        if sys.platform.startswith("win"):
+            WM_HOTKEY_MSG = 0x0312
+            msg = ctypes.wintypes.MSG.from_address(message.__int__())
+            if eventType == "windows_generic_MSG":
+                if msg.message == WM_HOTKEY_MSG:
+                    if msg.lParam == 0x500003:
+                        self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
+                    elif msg.lParam == 0x490003:
+                        self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
         return False, 0
-
 
 
 class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
