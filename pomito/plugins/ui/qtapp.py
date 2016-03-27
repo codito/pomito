@@ -8,6 +8,7 @@ Implementation of Qt user interface.
 from .qt_timer import Ui_MainWindow
 from .qt_task import Ui_TaskWindow
 from .qt_interrupt import Ui_InterruptionWindow
+from .keybinder import keybinder
 
 import datetime
 import logging
@@ -16,16 +17,12 @@ import sys
 from pomito.task import Task
 from pomito.plugins import ui
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 QtCore.Signal = QtCore.pyqtSignal
 QtCore.Slot = QtCore.pyqtSlot
 
 logger = logging.getLogger("pomito.plugins.ui.qtapp")
-
-if sys.platform.startswith("win"):
-    import ctypes
-    from ctypes import c_bool, c_int, WINFUNCTYPE, windll
-    from ctypes.wintypes import UINT
 
 
 class QtUI(ui.UIPlugin):
@@ -45,41 +42,34 @@ class QtUI(ui.UIPlugin):
 # FIXME: we're accessing UI QObjects in timer callbacks; this may cause cross
 # thread violation.
 class PomitoApp(QtWidgets.QApplication):
+    keybinder = None
+
     def __init__(self, argv):
         QtWidgets.QApplication.__init__(self, argv)
-
-        # Register os dependent hooks
-        if sys.platform.startswith("win"):
-            # http://msdn.microsoft.com/en-us/library/windows/desktop/ms646309%28v=vs.85%29.aspx
-            prototype = WINFUNCTYPE(c_bool, c_int, c_int, UINT, UINT)
-            paramflags = (1, 'hWnd', 0), (1, 'id', 0), (1, 'fsModifiers', 0), (1, 'vk', 0)
-            self.RegisterHotKey = prototype(('RegisterHotKey', windll.user32), paramflags)
-
-            # http://msdn.microsoft.com/en-us/library/windows/desktop/ms646327%28v=vs.85%29.aspx
-            prototype = WINFUNCTYPE(c_bool, c_int, c_int)
-            paramflags = (1, 'hWnd', 0), (1, 'id', 0)
-            self.UnregisterHotKey = prototype(('UnregisterHotKey', windll.user32), paramflags)
+        self.keybinder = keybinder()
         return
 
     def initialize(self, pomodoro_service):
         self._pomodoro_service = pomodoro_service
+        self.keybinder.init()
 
         # Create all windows/taskbars
-        self._timer_window = TimerWindow(self._pomodoro_service)
+        self._timer_window = TimerWindow(self._pomodoro_service, self.keybinder)
         icon = QtGui.QIcon(":/icon_pomito")
         self._timer_window.setWindowIcon(icon)
 
-        # Register hotkeys
-        if sys.platform.startswith("win"):
-            # MOD_CTRL + MOD_ALT = 0x0003, P = 0x50, I = 0x49
-            # http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
-            self.RegisterHotKey(TaskbarList.getptr(self._timer_window.winId()),
-                                0x1, 0x0003, 0x50)
-            self.RegisterHotKey(TaskbarList.getptr(self._timer_window.winId()),
-                                0x2, 0x0003, 0x49)
         return
 
     def run(self):
+        # self.keybinder.init()
+        # callback = lambda: print("hello world")
+        # self.keybinder.register_hotkey(None, "Shift-F3", callback)
+
+        # Install a native event filter to receive events from the OS
+        win_event_filter = WinEventFilter(self.keybinder)
+        event_dispatcher = QAbstractEventDispatcher.instance()
+        event_dispatcher.installNativeEventFilter(win_event_filter)
+
         self._timer_window.show()
         self.exec_()
         return
@@ -157,8 +147,9 @@ class QtUtilities:
 
 
 class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self, service):
+    def __init__(self, service, keybinder):
         QtWidgets.QMainWindow.__init__(self)
+        self.keybinder = keybinder
         self._service = service
         self._session_active = False
         self._session_count = 0
@@ -198,6 +189,20 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._service.signal_session_stopped.connect(self.on_session_stop)
         self._service.signal_interruption_started.connect(self.on_interrupt_start)
         self._service.signal_interruption_stopped.connect(self.on_interrupt_stop)
+
+        # Setup hotkeys
+        toggle_timer = lambda: self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
+        toggle_interrupt = lambda: self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+        if sys.platform.startswith("win"):
+            # MOD_CTRL + MOD_ALT = 0x0003, P = 0x50, I = 0x49
+            # http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
+            wid = TaskbarList.getptr(self._timer_window.winId())
+            self.keybinder.register_hotkey(wid, 0x500003, toggle_timer)
+            self.keybinder.register_hotkey(wid, 0x490003, toggle_interrupt)
+        else:
+            self.keybinder.register_hotkey(None, "Mod1-Control-P", toggle_timer)
+            self.keybinder.register_hotkey(None, "Mod1-Control-I",
+                                           toggle_interrupt)
 
         if self._timer_tray is not None:
             self._timer_tray.show()
@@ -381,19 +386,14 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             hwnd = TaskbarList.getptr(self.winId())
             self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_NOPROGRESS)
 
-    ###
-    # QMainWindow overrides
-    ###
-    def nativeEvent(self, eventType, message):
-        if sys.platform.startswith("win"):
-            WM_HOTKEY_MSG = 0x0312
-            msg = ctypes.wintypes.MSG.from_address(message.__int__())
-            if eventType == "windows_generic_MSG":
-                if msg.message == WM_HOTKEY_MSG:
-                    if msg.lParam == 0x500003:
-                        self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
-                    elif msg.lParam == 0x490003:
-                        self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+
+class WinEventFilter(QAbstractNativeEventFilter):
+    def __init__(self, keybinder):
+        self.keybinder = keybinder
+        super().__init__()
+
+    def nativeEventFilter(self, eventType, message):
+        self.keybinder.handler(message)
         return False, 0
 
 
