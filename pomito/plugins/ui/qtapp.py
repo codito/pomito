@@ -8,7 +8,7 @@ Implementation of Qt user interface.
 from .qt_timer import Ui_MainWindow
 from .qt_task import Ui_TaskWindow
 from .qt_interrupt import Ui_InterruptionWindow
-from .keybinder import keybinder
+from pyqtkeybind import keybinder
 
 import datetime
 import logging
