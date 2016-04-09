@@ -46,7 +46,7 @@ class PomitoApp(QtWidgets.QApplication):
 
     def __init__(self, argv):
         QtWidgets.QApplication.__init__(self, argv)
-        self.keybinder = keybinder()
+        self.keybinder = keybinder
         return
 
     def initialize(self, pomodoro_service):
