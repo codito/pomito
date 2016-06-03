@@ -1,6 +1,6 @@
 -r requirements.txt
 flake8
-git+https://github.com/codito/flake8-pep257.git@config-match-support
 pudb
+pydocstyle
 nose-pudb
 nose-watcher
