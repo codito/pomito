@@ -157,6 +157,10 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._interrupt_duration = 0
         self._last_session_timestamp = datetime.datetime.min
 
+        # Setup exit action
+        self._exit = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+Q"), self)
+        self._exit.activated.connect(self.close)
+
         # Setup child windows and taskbar
         self._interrupt_window = InterruptWindow(service)
         self._task_window = TaskWindow(service)
