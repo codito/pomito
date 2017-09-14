@@ -24,7 +24,7 @@ if sys.platform == "win32":
     from os import path
     pyqt_windows_root = get_pyqt_install_root()
     includefiles = [
-        (path.join(pyqt_windows_root, "plugins\\platforms\\qwindows.dll"),
+        (path.join(pyqt_windows_root, "qt\\plugins\\platforms\\qwindows.dll"),
          "platforms\\qwindows.dll"),
         ("pomito\\plugins\\ui\\wintaskbar.tlb", "wintaskbar.tlb"),
     ]

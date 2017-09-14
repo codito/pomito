@@ -1,0 +1,46 @@
+image: Visual Studio 2015
+
+# Turn off default msbuild integration
+build: false
+version: 0.2.{build}
+
+environment:
+  bintray_user:
+    secure: u2gaErEDY6qCasVxS+318Q==
+  bintray_key:
+    secure: 4wMikiVBJ3a6hXGBN7N7iYrntdzgeBEmYsTesxP2sQ0F/YL2MTChs7qHVNXo52pa
+
+init:
+  - ps: ls -Name "c:\\python*"
+  - "SET PATH=\\Python36;\\Python36\\Scripts;%PATH%"
+
+install:
+  - ps: cinst 7zip.commandline
+  - ps: ls -name "C:\\Python36\\Lib\\site-packages"
+  #- ps: ls -name "C:\\Python36\\Lib\\site-packages\\PyQt5"
+  #- ps: Set-Content -Path "C:\\Python36\\Lib\\site-packages\\PyQt5\\pyuic5.bat" -Value "C:\\Python36\\python.exe -m PyQt5.uic.pyuic %1 %2 %3 %4 %5 %6 %7 %8 %9"
+  #- ps: Get-Content "C:\\Python36\\Lib\\site-packages\\PyQt5\\pyuic5.bat" 
+
+  # Check that we have the expected version and architecture for Python
+  - "python --version"
+  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "pip --version"
+  - cd /D %APPVEYOR_BUILD_FOLDER%
+  - "pip install -r requirements.txt"
+  - "python setup.py build"
+  - cd build/exe.win32-3.6
+  - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
+  - ps: "& 7z a -r ../$env:pomito_zip ."
+  - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { $pomito_path = $(Resolve-Path "../$env:pomito_zip"); curl.exe -fsS -k -u "$($env:bintray_user):$env:bintray_key" -X PUT "https://api.bintray.com/content/codito/generic/pomito/$env:APPVEYOR_BUILD_VERSION/$($env:pomito_zip)?publish=1" --data-binary "@$pomito_path" }
+
+on_finish:
+  - cd /D %APPVEYOR_BUILD_FOLDER%
+
+test_script:
+  - cd /D %APPVEYOR_BUILD_FOLDER%
+  - "nosetests"
+
+artifacts:
+  - path: build/*.zip
+
+deploy: off

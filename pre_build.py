@@ -20,12 +20,12 @@ def build_qt():
 
     uic = "pyuic5"
     rcc = "pyrcc5"
-    lupdate = "pylupdate5"
-    if sys.platform.startswith("win"):
-        pyqt_windows_root = get_pyqt_install_root()
-        uic = path.join(pyqt_windows_root, uic + ".bat")
-        rcc = path.join(pyqt_windows_root, rcc)
-        lupdate = path.join(pyqt_windows_root, lupdate)
+    # lupdate = "pylupdate5"
+    # if sys.platform.startswith("win"):
+        # pyqt_windows_root = get_pyqt_install_root()
+        # uic = path.join(pyqt_windows_root, uic + ".bat")
+        # rcc = path.join(pyqt_windows_root, rcc)
+        # lupdate = path.join(pyqt_windows_root, lupdate)
 
     subprocess.check_call([uic, "data/qt/timer.ui", "--from-imports", "-o", "pomito/plugins/ui/qt_timer.py"])
     subprocess.check_call([uic, "data/qt/task.ui", "--from-imports", "-o", "pomito/plugins/ui/qt_task.py"])

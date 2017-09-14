@@ -4,6 +4,7 @@ mock
 nose
 peewee
 pyfakefs
+pyqt5
 rednose
 sure
 six
