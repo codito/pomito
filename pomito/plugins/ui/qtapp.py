@@ -16,7 +16,7 @@ import sys
 
 from pomito.task import Task
 from pomito.plugins import ui
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 QtCore.Signal = QtCore.pyqtSignal
@@ -194,7 +194,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._service.signal_interruption_started.connect(self.on_interrupt_start)
         self._service.signal_interruption_stopped.connect(self.on_interrupt_stop)
 
-        # Setup hotkeys
+        # Setup platform specific configuration
         toggle_timer = lambda: self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
         toggle_interrupt = lambda: self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
         if sys.platform.startswith("win"):
@@ -204,6 +204,8 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.keybinder.register_hotkey(wid, 0x500003, toggle_timer)
             self.keybinder.register_hotkey(wid, 0x490003, toggle_interrupt)
         else:
+            # if not notify2.init("pomito"):
+                # logger.debug("Failed to initialize notification.")
             self.keybinder.register_hotkey(None, "Mod1-Control-P", toggle_timer)
             self.keybinder.register_hotkey(None, "Mod1-Control-I",
                                            toggle_interrupt)
@@ -347,13 +349,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_session_start(self, *args, **kwargs):
         self._session_duration = kwargs["session_duration"]
         self._session_active = True
-        if self._task_bar is not None:
-            self._task_bar.SetProgressValue(TaskbarList.getptr(self.winId()),
-                                            0, self._session_duration)
-            if self._timer_tray is not None:
-                self._timer_tray\
-                    .showMessage("Pomodoro started!", "Stay focused...",
-                                 QtWidgets.QSystemTrayIcon.Information, 500)
+        self._notify_session_start()
 
     def on_session_stop(self, *args, **kwargs):
         # Reset session count if this is the first session of the day
@@ -369,13 +365,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._session_active = False
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
-        if self._task_bar is not None:
-            hwnd = TaskbarList.getptr(self.winId())
-            message = "{0} Sessions completed: {1}".format(reason, self._session_count)
-            self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_PAUSED)
-            if self._timer_tray is not None:
-                self._timer_tray.showMessage("Pomodoro ended!", message,
-                                             QtWidgets.QSystemTrayIcon.Information, 500)
+        self._notify_session_stop(reason)
 
     def on_interrupt_start(self, *args, **kwargs):
         return
@@ -386,9 +376,63 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_timer.setDisabled(False)
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
-        if not self._task_bar is None:
+        if self._task_bar is not None:
             hwnd = TaskbarList.getptr(self.winId())
             self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_NOPROGRESS)
+
+    def _notify_session_start(self):
+        header = "Pomodoro started!"
+        msg = "Stay focused..."
+        if self._task_bar is not None:
+            self._task_bar.SetProgressValue(TaskbarList.getptr(self.winId()),
+                                            0, self._session_duration)
+        if self._timer_tray is not None:
+            info_icon = QtWidgets.QSystemTrayIcon.Information
+            self._timer_tray.showMessage(header, msg, info_icon, 500)
+        elif not sys.platform.startswith("win"):
+            self._notify(header, msg)
+
+    def _notify_session_stop(self, reason):
+        header = "Pomodoro ended!"
+        msg = "{0} Sessions completed: {1}".format(reason, self._session_count)
+        if self._task_bar is not None:
+            hwnd = TaskbarList.getptr(self.winId())
+            self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_PAUSED)
+
+        if self._timer_tray is not None:
+            info_icon = QtWidgets.QSystemTrayIcon.Information
+            self._timer_tray.showMessage(header, msg, info_icon, 500)
+        elif not sys.platform.startswith("win"):
+            self._notify(header, msg)
+
+    def _notify(self, header, msg):
+        item = "org.freedesktop.Notifications"
+        path = "/org/freedesktop/Notifications"
+        interface = "org.freedesktop.Notifications"
+        app_name = "pomito"
+        v = QtCore.QVariant(100021)  # random int to identify all notifications
+        if v.convert(QtCore.QVariant.UInt):
+            id_replace = v
+        icon = ""
+        title = header
+        text = msg
+        actions_list = QtDBus.QDBusArgument([], QtCore.QMetaType.QStringList)
+        hint = {}
+        time = 100   # milliseconds for display timeout
+
+        bus = QtDBus.QDBusConnection.sessionBus()
+        if not bus.isConnected():
+            logger.debug("Not connected to dbus!")
+        notify = QtDBus.QDBusInterface(item, path, interface, bus)
+        if notify.isValid():
+            x = notify.call(QtDBus.QDBus.AutoDetect, "Notify", app_name,
+                            id_replace, icon, title, text,
+                            actions_list, hint, time)
+            if x.errorName():
+                logger.debug("Failed to send notification!")
+                logger.debug(x.errorMessage())
+        else:
+            logger.debug("Invalid dbus interface")
 
 
 class WinEventFilter(QAbstractNativeEventFilter):
