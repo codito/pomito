@@ -12,5 +12,4 @@ comtypes
 click
 -e git://github.com/codito/asana.git@python3#egg=asana
 cx_freeze
-esky
 -e git://github.com/codito/pyqtkeybind.git@master#egg=pyqtkeybind
