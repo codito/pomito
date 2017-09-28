@@ -1,0 +1,32 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+blinker = "*"
+coveralls = "*"
+mock = "*"
+nose = "*"
+peewee = "*"
+pyfakefs = "*"
+pyqt5 = "*"
+rednose = "*"
+sure = "*"
+comtypes = "*"
+click = "*"
+asana = {git = "git://github.com/codito/asana.git", editable = true, ref = "python3"}
+"cx-freeze" = "*"
+esky = "*"
+pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master"}
+
+[dev-packages]
+flake8 = "*"
+jedi = "*"
+pudb = "*"
+pydocstyle = "*"
+nose-pudb = "*"
+nose-watcher = "*"
+
+[requires]
+python_version = "3.6"

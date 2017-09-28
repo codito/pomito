@@ -26,8 +26,9 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   - "pip --version"
   - cd /D %APPVEYOR_BUILD_FOLDER%
-  - "pip install -r requirements.txt"
-  - "python setup.py build"
+  - "pip install pipenv"
+  - "pipenv install --dev"
+  - "pipenv run python setup.py build"
   - cd build/exe.win32-3.6
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
@@ -38,7 +39,7 @@ on_finish:
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
-  - "nosetests"
+  - "pipenv run nosetests"
 
 artifacts:
   - path: build/*.zip
