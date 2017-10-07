@@ -10,8 +10,8 @@ peewee = "*"
 "pyqt5" = "*"
 comtypes = "*"
 click = "*"
-asana = { git = "https://github.com/codito/asana.git", editable = true, ref = "python3" }
-pyqtkeybind = { git = "https://github.com/codito/pyqtkeybind.git", editable = true, ref = "master" }
+asana = { git = "git://github.com/codito/asana.git", editable = true, ref = "python3" }
+pyqtkeybind = { git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master" }
 
 [dev-packages]
 

@@ -38,7 +38,7 @@ build_version = build_version_major + "." + build_version_minor
 
 executables = [Executable("pomito.py", base=base)]
 buildOptions = dict(packages=[], excludes=[],
-                    includes=["atexit", "sip"],
+                    includes=["atexit", "sip", "idna.idnadata"],
                     include_files=includefiles,
                     )
 setup_options = dict(build_exe=buildOptions)

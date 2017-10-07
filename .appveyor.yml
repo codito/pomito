@@ -27,6 +27,8 @@ install:
   - "pip --version"
   - cd /D %APPVEYOR_BUILD_FOLDER%
   - "pip install pipenv"
+  - "python -m venv .venv"
+  - ps: .venv\Scripts\activate.ps1
   - "pipenv install --dev"
   - "pipenv run python setup.py build"
   - cd build/exe.win32-3.6
