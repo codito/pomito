@@ -4,28 +4,30 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+
 blinker = "*"
-coveralls = "*"
-mock = "*"
-nose = "*"
 peewee = "*"
-pyfakefs = "*"
-pyqt5 = "*"
-rednose = "*"
-sure = "*"
-comtypes = { version = "*", platform_system = "== 'Windows'" }
+"pyqt5" = "*"
+comtypes = "*"
 click = "*"
-asana = {git = "git://github.com/codito/asana.git", editable = true, ref = "python3"}
-"cx-freeze" = "*"
-pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master"}
+asana = { git = "https://github.com/codito/asana.git", editable = true, ref = "python3" }
+pyqtkeybind = { git = "https://github.com/codito/pyqtkeybind.git", editable = true, ref = "master" }
 
 [dev-packages]
-flake8 = "*"
-jedi = { version = "*", platform_system = "== 'Linux'" }
-pudb = { version = "*", platform_system = "== 'Linux'" }
+
+coveralls = "*"
+"cx-freeze" = "*"
+"flake8" = "*"
+jedi = "*"
+mock = "*"
+nose = "*"
+"nose-pudb" = "*"
+"nose-watch" = "*"
+pudb = "*"
 pydocstyle = "*"
-nose-pudb = { version = "*", platform_system = "== 'Linux'" }
-nose-watcher = { version = "*", platform_system = "== 'Linux'" }
+pyfakefs = "*"
+rednose = "*"
+sure = "*"
 
 [requires]
 python_version = "3.6"
