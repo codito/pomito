@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/qt/timer.ui'
 #
-# Created by: PyQt5 UI code generator 5.5
+# Created by: PyQt5 UI code generator 5.9
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -31,6 +31,7 @@ class Ui_MainWindow(object):
         self.layoutWidget.setGeometry(QtCore.QRect(11, 11, 571, 121))
         self.layoutWidget.setObjectName("layoutWidget")
         self.gridLayout = QtWidgets.QGridLayout(self.layoutWidget)
+        self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
@@ -42,8 +43,8 @@ class Ui_MainWindow(object):
         self.btn_timer.setSizePolicy(sizePolicy)
         self.btn_timer.setMinimumSize(QtCore.QSize(24, 24))
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icon_start_timer"), QtGui.QIcon.Active, QtGui.QIcon.Off)
         icon1.addPixmap(QtGui.QPixmap(":/icon_start_timer"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/icon_start_timer"), QtGui.QIcon.Active, QtGui.QIcon.Off)
         icon1.addPixmap(QtGui.QPixmap(":/icon_stop_timer"), QtGui.QIcon.Active, QtGui.QIcon.On)
         self.btn_timer.setIcon(icon1)
         self.btn_timer.setCheckable(True)

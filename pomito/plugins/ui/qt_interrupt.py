@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data/qt/interrupt.ui'
 #
-# Created by: PyQt5 UI code generator 5.5
+# Created by: PyQt5 UI code generator 5.9
 #
 # WARNING! All changes made in this file will be lost!
 

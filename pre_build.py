@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Steps to compile resources for Qt
-"""
-import sys
-from os import path
+"""Steps to compile resources for Qt."""
+import importlib.util
+
 
 def get_pyqt_install_root():
-    """Gets pyqt install path in windows environment."""
-    pyqt_install_root = None
-    if sys.platform == "win32":
-        python_root = path.split(sys.executable)[0]
-        pyqt_install_root = path.join(python_root, "Lib\\site-packages\\PyQt5")
-    return pyqt_install_root
+    """Get pyqt install path."""
+    return importlib.util.find_spec('PyQt5').submodule_search_locations[0]
 
 
 def build_qt():
@@ -20,17 +14,17 @@ def build_qt():
 
     uic = "pyuic5"
     rcc = "pyrcc5"
-    # lupdate = "pylupdate5"
-    # if sys.platform.startswith("win"):
-        # pyqt_windows_root = get_pyqt_install_root()
-        # uic = path.join(pyqt_windows_root, uic + ".bat")
-        # rcc = path.join(pyqt_windows_root, rcc)
-        # lupdate = path.join(pyqt_windows_root, lupdate)
+    uic_files = [("data/qt/timer.ui", "pomito/plugins/ui/qt_timer.py"),
+                 ("data/qt/task.ui", "pomito/plugins/ui/qt_task.py"),
+                 ("data/qt/interrupt.ui", "pomito/plugins/ui/qt_interrupt.py")]
+    rcc_files = [("data/qt/pomito.qrc", "pomito/plugins/ui/pomito_rc.py")]
 
-    subprocess.check_call([uic, "data/qt/timer.ui", "--from-imports", "-o", "pomito/plugins/ui/qt_timer.py"])
-    subprocess.check_call([uic, "data/qt/task.ui", "--from-imports", "-o", "pomito/plugins/ui/qt_task.py"])
-    subprocess.check_call([uic, "data/qt/interrupt.ui", "--from-imports", "-o", "pomito/plugins/ui/qt_interrupt.py"])
-    subprocess.check_call([rcc, "data/qt/pomito.qrc", "-o", "pomito/plugins/ui/pomito_rc.py"])
+    for f in uic_files:
+        subprocess.check_call([uic, f[0], "--from-imports", "-o", f[1]])
+
+    for f in rcc_files:
+        subprocess.check_call([rcc, f[0], "-o", f[1]])
     return
+
 
 build_qt()
