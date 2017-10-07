@@ -13,7 +13,7 @@ pyfakefs = "*"
 pyqt5 = "*"
 rednose = "*"
 sure = "*"
-comtypes = { version = "*", sys_platform = "== 'Windows'" }
+comtypes = { version = "*", platform_system = "== 'Windows'" }
 click = "*"
 asana = {git = "git://github.com/codito/asana.git", editable = true, ref = "python3"}
 "cx-freeze" = "*"
@@ -21,11 +21,11 @@ pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true,
 
 [dev-packages]
 flake8 = "*"
-jedi = { version = "*", sys_platform = "== 'Linux'" }
-pudb = { version = "*", sys_platform = "== 'Linux'" }
+jedi = { version = "*", platform_system = "== 'Linux'" }
+pudb = { version = "*", platform_system = "== 'Linux'" }
 pydocstyle = "*"
-nose-pudb = { version = "*", sys_platform = "== 'Linux'" }
-nose-watcher = { version = "*", sys_platform = "== 'Linux'" }
+nose-pudb = { version = "*", platform_system = "== 'Linux'" }
+nose-watcher = { version = "*", platform_system = "== 'Linux'" }
 
 [requires]
 python_version = "3.6"
