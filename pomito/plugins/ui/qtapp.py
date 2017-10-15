@@ -441,7 +441,7 @@ class WinEventFilter(QAbstractNativeEventFilter):
         super().__init__()
 
     def nativeEventFilter(self, eventType, message):
-        self.keybinder.handler(message)
+        self.keybinder.handler(eventType, message)
         return False, 0
 
 
