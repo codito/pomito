@@ -197,24 +197,17 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Setup platform specific configuration
         toggle_timer = lambda: self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
         toggle_interrupt = lambda: self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+        wid = None
         if sys.platform.startswith("win"):
-            # MOD_CTRL + MOD_ALT = 0x0003, P = 0x50, I = 0x49
-            # http://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
-            wid = TaskbarList.getptr(self._timer_window.winId())
-            self.keybinder.register_hotkey(wid, 0x500003, toggle_timer)
-            self.keybinder.register_hotkey(wid, 0x490003, toggle_interrupt)
-        else:
-            # if not notify2.init("pomito"):
-                # logger.debug("Failed to initialize notification.")
-            self.keybinder.register_hotkey(None, "Mod1-Control-P", toggle_timer)
-            self.keybinder.register_hotkey(None, "Mod1-Control-I",
-                                           toggle_interrupt)
+            wid = TaskbarList.getptr(self.winId())
+        self.keybinder.register_hotkey(wid, "Mod1-Control-P", toggle_timer)
+        self.keybinder.register_hotkey(wid, "Mod1-Control-I", toggle_interrupt)
 
         if self._timer_tray is not None:
             self._timer_tray.show()
             # TODO Find a way to bring timerwindow into focus when user clicks
             # on system tray notification
-            #self._timer_tray.messageClicked.connect(lambda: self.raise_() and self.setFocus())
+            # self._timer_tray.messageClicked.connect(lambda: self.raise_() and self.setFocus())
 
     def reset_timer(self, reset_session):
         self._session_count = 0 if reset_session else self._session_count
