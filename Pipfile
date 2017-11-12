@@ -9,7 +9,7 @@ name = "pypi"
 
 blinker = "*"
 peewee = "*"
-"pyqt5" = "*"
+"PyQt5" = "*"
 comtypes = "*"
 click = "*"
 asana = { git = "git://github.com/codito/asana.git", editable = true, ref = "python3" }
@@ -19,9 +19,8 @@ pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true,
 [dev-packages]
 
 coveralls = "*"
-cx-freeze = "*"
+cx_Freeze = "*"
 "flake8" = "*"
-jedi = "*"
 mock = "*"
 nose = "*"
 nose-pudb = "*"
