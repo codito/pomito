@@ -200,8 +200,10 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         wid = None
         if sys.platform.startswith("win"):
             wid = TaskbarList.getptr(self.winId())
-        self.keybinder.register_hotkey(wid, "Mod1-Control-P", toggle_timer)
-        self.keybinder.register_hotkey(wid, "Mod1-Control-I", toggle_interrupt)
+        else:
+            # Temporarily disable hotkeys for win32
+            self.keybinder.register_hotkey(wid, "Mod1-Control-P", toggle_timer)
+            self.keybinder.register_hotkey(wid, "Mod1-Control-I", toggle_interrupt)
 
         if self._timer_tray is not None:
             self._timer_tray.show()
