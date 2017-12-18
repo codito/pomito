@@ -29,7 +29,7 @@ includefiles += [
 ]
 
 build_version_major = "0.2"
-build_version_minor = "0-dev"
+build_version_minor = "0"
 if os.getenv("APPVEYOR_BUILD"):
     build_version_minor = int(os.getenv("APPVEYOR_BUILD_NUMBER")) % 100
 elif os.getenv("TRAVIS_BUILD"):
@@ -40,6 +40,9 @@ executables = [Executable("pomito.py", base=base)]
 buildOptions = dict(packages=[], excludes=[],
                     includes=["atexit", "sip", "idna.idnadata"],
                     include_files=includefiles,
+                    zip_include_packages=["*"],
+                    zip_exclude_packages=[],
+                    optimize=2
                     )
 setup_options = dict(build_exe=buildOptions)
 
