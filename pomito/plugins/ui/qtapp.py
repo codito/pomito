@@ -176,7 +176,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.initialize()
 
     def initialize(self):
-        #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.reset_timer(True)
         self.update_activity_label(None)
 
@@ -195,15 +195,21 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._service.signal_interruption_stopped.connect(self.on_interrupt_stop)
 
         # Setup platform specific configuration
-        toggle_timer = lambda: self.btn_timer_clicked(checked=self.btn_timer.isChecked, keyboard_context=True)
-        toggle_interrupt = lambda: self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked, keyboard_context=True)
+        def toggle_timer():
+            self.btn_timer_clicked(checked=self.btn_timer.isChecked,
+                                   keyboard_context=True)
+            return
+
+        def toggle_interrupt():
+            self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked,
+                                       keyboard_context=True)
+            return
         wid = None
         if sys.platform.startswith("win"):
             wid = TaskbarList.getptr(self.winId())
-        else:
-            # Temporarily disable hotkeys for win32
-            self.keybinder.register_hotkey(wid, "Mod1-Control-P", toggle_timer)
-            self.keybinder.register_hotkey(wid, "Mod1-Control-I", toggle_interrupt)
+
+        self.keybinder.register_hotkey(wid, "Alt+Ctrl+P", toggle_timer)
+        self.keybinder.register_hotkey(wid, "Alt+Ctrl+I", toggle_interrupt)
 
         if self._timer_tray is not None:
             self._timer_tray.show()
