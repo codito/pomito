@@ -442,8 +442,8 @@ class WinEventFilter(QAbstractNativeEventFilter):
         super().__init__()
 
     def nativeEventFilter(self, eventType, message):
-        self.keybinder.handler(eventType, message)
-        return False, 0
+        ret = self.keybinder.handler(eventType, message)
+        return ret, 0
 
 
 class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
