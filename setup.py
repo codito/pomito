@@ -19,7 +19,7 @@ if sys.platform == "win32":
     includefiles = [
         (path.join(pyqt_windows_root, "qt\\plugins\\platforms\\qwindows.dll"),
          "platforms\\qwindows.dll"),
-        ("pomito\\plugins\\ui\\wintaskbar.tlb", "wintaskbar.tlb"),
+        ("pomito\\plugins\\ui\\qt\\wintaskbar.tlb", "wintaskbar.tlb"),
     ]
     base = "Win32GUI"
 
