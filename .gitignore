@@ -60,3 +60,6 @@ target/
 
 # Local peewee.db
 peewee.db
+
+# Ignore pycharm files
+.idea/

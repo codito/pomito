@@ -14,10 +14,10 @@ def build_qt():
 
     uic = "pyuic5"
     rcc = "pyrcc5"
-    uic_files = [("data/qt/timer.ui", "pomito/plugins/ui/qt_timer.py"),
-                 ("data/qt/task.ui", "pomito/plugins/ui/qt_task.py"),
-                 ("data/qt/interrupt.ui", "pomito/plugins/ui/qt_interrupt.py")]
-    rcc_files = [("data/qt/pomito.qrc", "pomito/plugins/ui/pomito_rc.py")]
+    uic_files = [("data/qt/timer.ui", "pomito/plugins/ui/qt/qt_timer.py"),
+                 ("data/qt/task.ui", "pomito/plugins/ui/qt/qt_task.py"),
+                 ("data/qt/interrupt.ui", "pomito/plugins/ui/qt/qt_interrupt.py")]
+    rcc_files = [("data/qt/pomito.qrc", "pomito/plugins/ui/qt/pomito_rc.py")]
 
     for f in uic_files:
         subprocess.check_call([uic, f[0], "--from-imports", "-o", f[1]])

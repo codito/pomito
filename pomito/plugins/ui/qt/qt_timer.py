@@ -162,4 +162,5 @@ class Ui_MainWindow(object):
         self.btn_task.setText(_translate("MainWindow", "T&asks"))
         self.activity_label.setText(_translate("MainWindow", "A long long and more long, still longer task andmore and more and more and still more, a bit more"))
 
-from . import pomito_rc
+
+from pomito.plugins.ui.qt import pomito_rc

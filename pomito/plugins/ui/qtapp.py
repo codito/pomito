@@ -5,18 +5,19 @@ Pomito - Pomodoro timer on steroids.
 Implementation of Qt user interface.
 """
 
-from .qt_timer import Ui_MainWindow
-from .qt_task import Ui_TaskWindow
-from .qt_interrupt import Ui_InterruptionWindow
+from pomito.plugins.ui.qt.qt_timer import Ui_MainWindow
+from pomito.plugins.ui.qt.qt_task import Ui_TaskWindow
+from pomito.plugins.ui.qt.qt_interrupt import Ui_InterruptionWindow
 from pyqtkeybind import keybinder
 
 import datetime
 import logging
 import sys
 
+from pomito.plugins.ui.qt.shell import Taskbar, Tray
 from pomito.task import Task
 from pomito.plugins import ui
-from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 QtCore.Signal = QtCore.pyqtSignal
@@ -50,21 +51,17 @@ class PomitoApp(QtWidgets.QApplication):
         return
 
     def initialize(self, pomodoro_service):
-        self._pomodoro_service = pomodoro_service
+        self._service = pomodoro_service
         self.keybinder.init()
 
         # Create all windows/taskbars
-        self._timer_window = TimerWindow(self._pomodoro_service, self.keybinder)
+        self._timer_window = TimerWindow(self._service, self.keybinder)
         icon = QtGui.QIcon(":/icon_pomito")
         self._timer_window.setWindowIcon(icon)
 
         return
 
     def run(self):
-        # self.keybinder.init()
-        # callback = lambda: print("hello world")
-        # self.keybinder.register_hotkey(None, "Shift-F3", callback)
-
         # Install a native event filter to receive events from the OS
         win_event_filter = WinEventFilter(self.keybinder)
         event_dispatcher = QAbstractEventDispatcher.instance()
@@ -73,44 +70,6 @@ class PomitoApp(QtWidgets.QApplication):
         self._timer_window.show()
         self.exec_()
         return
-
-
-class TaskbarList(object):
-    """ Support for Windows Taskbar"""
-    TBPF_NOPROGRESS = 0
-    TBPF_INDETERMINATE = 0x1
-    TBPF_NORMAL = 0x2
-    TBPF_ERROR = 0x4
-    TBPF_PAUSED = 0x8
-
-    taskbar = None
-
-    def __init__(self):
-        import sys
-        if not sys.platform.startswith("win"):
-            return
-        import comtypes.client as cc
-        cc.GetModule("wintaskbar.tlb")
-
-        import comtypes.gen.TaskbarLib as tbl
-        self.taskbar = cc.CreateObject(
-            "{56FDF344-FD6D-11d0-958A-006097C9A090}",
-            interface=tbl.ITaskbarList3)
-        self.taskbar.HrInit()
-        return
-
-    @classmethod
-    def getptr(cls, pycobject):
-        # Imports all we need
-        from ctypes import pythonapi, c_void_p, py_object
-
-        # Setup arguments and return types
-        pythonapi.PyCapsule_GetPointer.restype = c_void_p
-        pythonapi.PyCapsule_GetPointer.argtypes = [py_object]
-
-        # Convert PyCObject to a void pointer
-        # return pythonapi.PyCapsule_GetPointer(pycobject)
-        return pycobject
 
 
 class QtUtilities:
@@ -164,12 +123,9 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Setup child windows and taskbar
         self._interrupt_window = InterruptWindow(service)
         self._task_window = TaskWindow(service)
-        self._task_bar = TaskbarList().taskbar
-        self._timer_tray = None
-        if QtWidgets.QSystemTrayIcon.isSystemTrayAvailable():
-            self._timer_tray = QtWidgets.QSystemTrayIcon(QtGui.QIcon(":/icon_pomito"),
-                                                         parent=self)
-            self._current_task = None
+        self._task_bar = Taskbar()
+        self._timer_tray = Tray(self, QtGui.QIcon(":/icon_pomito"))
+        self._current_task = None
 
         # Setup user interface from designer
         self.setupUi(self)
@@ -204,18 +160,10 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.btn_interrupt_clicked(checked=self.btn_interrupt.isChecked,
                                        keyboard_context=True)
             return
-        wid = None
-        if sys.platform.startswith("win"):
-            wid = TaskbarList.getptr(self.winId())
-
+        wid = self.winId()
         self.keybinder.register_hotkey(wid, "Alt+Ctrl+P", toggle_timer)
         self.keybinder.register_hotkey(wid, "Alt+Ctrl+I", toggle_interrupt)
-
-        if self._timer_tray is not None:
-            self._timer_tray.show()
-            # TODO Find a way to bring timerwindow into focus when user clicks
-            # on system tray notification
-            # self._timer_tray.messageClicked.connect(lambda: self.raise_() and self.setFocus())
+        self._timer_tray.show()
 
     def reset_timer(self, reset_session):
         self._session_count = 0 if reset_session else self._session_count
@@ -233,11 +181,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._service.stop_interruption()
         elif self.btn_timer.isChecked():
             self._service.stop_break()
-            if self._timer_tray is not None:
-                self._timer_tray.hide()
-                return
-        if self._timer_tray is not None:
-            self._timer_tray.hide()
+        self._timer_tray.hide()
 
     def resizeEvent(self, resize_event):
         super(self.__class__, self).resizeEvent(resize_event)
@@ -337,15 +281,11 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         display_time = time_elapsed if self.btn_interrupt.isChecked() else (self._session_duration - time_elapsed)
         text = "{0:02d}:{1:02d}".format(int(display_time / 60), display_time % 60)
         self.timer_lcd.display(text)
-        if not self._task_bar is None:
-            hwnd = TaskbarList.getptr(self.winId())
-            if not self.btn_interrupt.isChecked():
-                self._task_bar.SetProgressValue(hwnd, time_elapsed,
-                                                self._session_duration)
-                self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_NORMAL)
-            else:
-                self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_INDETERMINATE)
-                return
+        if not self.btn_interrupt.isChecked():
+            self._task_bar.update(self.winId(), time_elapsed,
+                                  self._session_duration)
+        else:
+            self._task_bar.indeterminate(self.winId())
 
     def on_session_start(self, *args, **kwargs):
         self._session_duration = kwargs["session_duration"]
@@ -377,33 +317,25 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_timer.setDisabled(False)
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
-        if self._task_bar is not None:
-            hwnd = TaskbarList.getptr(self.winId())
-            self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_NOPROGRESS)
+        self._task_bar.reset()
 
     def _notify_session_start(self):
         header = "Pomodoro started!"
         msg = "Stay focused..."
-        if self._task_bar is not None:
-            self._task_bar.SetProgressValue(TaskbarList.getptr(self.winId()),
-                                            0, self._session_duration)
-        if self._timer_tray is not None:
-            info_icon = QtWidgets.QSystemTrayIcon.Information
-            self._timer_tray.showMessage(header, msg, info_icon, 500)
-        elif not sys.platform.startswith("win"):
+        self._task_bar.update(self.winId(), 0, self._session_duration)
+        self._timer_tray.info(header, msg)
+        # FIXME dbus
+        if not sys.platform.startswith("win"):
             self._notify(header, msg)
 
     def _notify_session_stop(self, reason):
         header = "Pomodoro ended!"
         msg = "{0} Sessions completed: {1}".format(reason, self._session_count)
-        if self._task_bar is not None:
-            hwnd = TaskbarList.getptr(self.winId())
-            self._task_bar.SetProgressState(hwnd, TaskbarList.TBPF_PAUSED)
+        self._task_bar.pause(self.winId())
 
-        if self._timer_tray is not None:
-            info_icon = QtWidgets.QSystemTrayIcon.Information
-            self._timer_tray.showMessage(header, msg, info_icon, 500)
-        elif not sys.platform.startswith("win"):
+        self._timer_tray.info(header, msg)
+        # FIXME dbus
+        if not sys.platform.startswith("win"):
             self._notify(header, msg)
 
     def _notify(self, header, msg):
@@ -557,7 +489,6 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
             self._tasks = tasks
             self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(len(self._tasks), 0))
             return
-
 
     class TaskItemDelegate(QtWidgets.QStyledItemDelegate):
         def __init__(self):
