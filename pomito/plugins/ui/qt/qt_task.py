@@ -110,5 +110,4 @@ class Ui_TaskWindow(object):
         self.act_select_task.setToolTip(_translate("TaskWindow", "select_task"))
         self.act_select_task.setShortcut(_translate("TaskWindow", "Return"))
 
-
-from pomito.plugins.ui.qt import pomito_rc
+from . import pomito_rc

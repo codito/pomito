@@ -51,5 +51,4 @@ class Ui_InterruptionWindow(object):
         self.act_hide_window.setText(_translate("InterruptionWindow", "hide"))
         self.act_hide_window.setShortcut(_translate("InterruptionWindow", "Esc"))
 
-
-from pomito.plugins.ui.qt import pomito_rc
+from . import pomito_rc

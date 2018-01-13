@@ -7,8 +7,7 @@
     <file alias="icon_options">glyphicons_019_cogwheel.png</file>
     <file alias="icon_stats">glyphicons_041_charts.png</file>
     <file alias="icon_interrupt">glyphicons_282_cardio.png</file>
-    <file alias="pomito_icon.svg">pomito_icon.svg</file>
-    <file alias="icon_pomito">glyphicons_053_alarm.png</file>
+    <file alias="icon_pomito">pomito.svg</file>
     <file alias="icon_start_timer">glyphicons_173_play.png</file>
     <file alias="icon_stop_timer">glyphicons_175_stop.png</file>
     <file alias="icon_task_list">glyphicons_156_show_thumbnails_with_lines.png</file>
