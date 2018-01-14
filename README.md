@@ -41,5 +41,4 @@ Start `pomito.exe` from unzipped directory. E.g. `g:\apps\pomito\pomito.exe`.
 
 Credits
 ======
-- javierkiopo, for the svg icon http://www.openclipart.org/detail/94717
 - icons from glyphicons.com
