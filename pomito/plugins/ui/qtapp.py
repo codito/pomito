@@ -17,7 +17,7 @@ import sys
 from pomito.plugins.ui.qt.shell import Taskbar, Tray
 from pomito.task import Task
 from pomito.plugins import ui
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 QtCore.Signal = QtCore.pyqtSignal
