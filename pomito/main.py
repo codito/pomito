@@ -155,7 +155,9 @@ class Pomito(object):
         """Initializes configuration, database and starts worker threads."""
         database_path = os.path.join(DATA_DIR, "pomito_data.db")
         if not os.path.exists(database_path) and not self._database:
-            self._database = SqliteDatabase(database_path)
+            self._database = SqliteDatabase(None)
+            self._database.init(database_path)
+            self._database.connect()
 
         # Initialize the plugins
         self.ui_plugin.initialize()
@@ -165,7 +167,6 @@ class Pomito(object):
         for hook in self._hooks:
             hook.initialize()
         return
-
 
     def run(self):
         """Start the application."""
