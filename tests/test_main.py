@@ -7,6 +7,8 @@ from unittest.mock import Mock
 
 import blinker
 import sure
+import tempfile
+from contextlib import contextmanager
 from peewee import SqliteDatabase
 from pyfakefs import fake_filesystem
 
@@ -135,13 +137,14 @@ class PomitoTests(unittest.TestCase):
         pomito.exit()
 
     def test_initialize_creates_database_if_not_present(self):
-        pomito = self.main.Pomito()
-        self._setup_pomito_plugins(pomito)
+        with self._setup_data_dir():
+            pomito = self.main.Pomito()
+            self._setup_pomito_plugins(pomito)
 
-        pomito.initialize()
+            pomito.initialize()
 
-        pomito.get_db().shouldnt.be.equal(None)
-        pomito.exit()
+            pomito.get_db().shouldnt.be.equal(None)
+            pomito.exit()
 
     def test_initialize_uses_injected_database(self):
         dummy_db = SqliteDatabase(':memory:')
@@ -154,16 +157,17 @@ class PomitoTests(unittest.TestCase):
         pomito.exit()
 
     def test_initialize_setup_plugins_and_hooks(self):
-        pomito = self.main.Pomito()
-        self._setup_pomito_plugins(pomito)
-        self._setup_pomito_hooks(pomito)
+        with self._setup_data_dir():
+            pomito = self.main.Pomito()
+            self._setup_pomito_plugins(pomito)
+            self._setup_pomito_hooks(pomito)
 
-        pomito.initialize()
+            pomito.initialize()
 
-        pomito.ui_plugin.initialize.call_count.should.be.equal(1)
-        pomito.task_plugin.initialize.call_count.should.be.equal(1)
-        pomito._hooks[0].initialize.call_count.should.be.equal(1)
-        pomito.exit()
+            pomito.ui_plugin.initialize.call_count.should.be.equal(1)
+            pomito.task_plugin.initialize.call_count.should.be.equal(1)
+            pomito._hooks[0].initialize.call_count.should.be.equal(1)
+            pomito.exit()
 
     def test_get_parser_returns_a_configparser_with_config_data(self):
         pass
@@ -179,3 +183,11 @@ class PomitoTests(unittest.TestCase):
 
     def _setup_pomito_hooks(self, pomito):
         pomito._hooks[0] = Mock(spec=Hook)
+
+    @contextmanager
+    def _setup_data_dir(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            data_dir = self.main.DATA_DIR
+            self.main.DATA_DIR = tmpdir
+            yield
+            self.main.DATA_DIR = data_dir
