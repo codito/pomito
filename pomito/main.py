@@ -157,7 +157,7 @@ class Pomito(object):
         if not os.path.exists(database_path) and not self._database:
             self._database = SqliteDatabase(None)
             self._database.init(database_path)
-            self._database.connect()
+        self._database.connect()
 
         # Initialize the plugins
         self.ui_plugin.initialize()
@@ -189,6 +189,8 @@ class Pomito(object):
             hook.close()
         #self._validate_state()
         #self._parser.write()
+        if self._database is not None:
+            self._database.close()
         return
 
     def get_db(self):

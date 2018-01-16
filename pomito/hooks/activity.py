@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
-# Pomito - Pomodoro timer on steroids
-# Maintains a log of all user activities
+# Pomito - Pomodoro timer on steroids.
+"""Activity module maintains a log of all user activities."""
 
 
 from datetime import datetime
 
 from pomito.hooks import Hook
 
-from peewee import Model, DateTimeField, CharField, TextField
+from peewee import Model, Proxy, DateTimeField, CharField, TextField
+
+database_proxy = Proxy()
 
 
 class ActivityHook(Hook):
-    """Activity hook listens to session and interruption events. Keeps a record
-    of pomodoro statistics.
+    """Activity hook listens to session and interruption events.
+
+    Keeps a record of pomodoro statistics.
     """
-    activity_db = None
 
     def __init__(self, service):
         self._service = service
-        return
 
     def initialize(self):
-        ActivityHook.activity_db = self._service.get_db()
+        database_proxy.initialize(self._service.get_db())
         ActivityModel.create_table(True)
 
         self._service.signal_session_stopped\
@@ -29,13 +30,12 @@ class ActivityHook(Hook):
         self._service.signal_break_stopped.connect(self.handle_break_stopped)
         self._service.signal_interruption_stopped\
             .connect(self.handle_interruption_stopped)
-        return
 
     def log(self, category, data):
-        activity = ActivityModel(timestamp=datetime.now(), category=category,
+        activity = ActivityModel(timestamp=datetime.now(),
+                                 category=category,
                                  data=data)
         activity.save()
-        return
 
     def close(self):
         self._service.signal_session_stopped\
@@ -44,7 +44,6 @@ class ActivityHook(Hook):
             .disconnect(self.handle_break_stopped)
         self._service.signal_interruption_stopped\
             .disconnect(self.handle_interruption_stopped)
-        return
 
     ####
     # Pomodoro service signal handlers
@@ -75,4 +74,4 @@ class ActivityModel(Model):
     data = TextField()
 
     class Meta:
-        database = ActivityHook.activity_db
+        database = database_proxy

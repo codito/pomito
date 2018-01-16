@@ -11,6 +11,7 @@ from pomito import main, pomodoro
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 
+
 class FakeTimer(object):
     """A synchronous fake timer."""
 
@@ -71,10 +72,11 @@ class FakeTaskPlugin(TaskPlugin):
     def get_tasks(self):
         return self.task_list
 
+
 class PomitoTestFactory(object):
     """Creates fake pomodoro framework instances for testing."""
     config_file = None
-    database = SqliteDatabase(':memory')
+    database = SqliteDatabase(':memory:')
     message_dispatcher = FakeMessageDispatcher()
 
     def create_fake_service(self):

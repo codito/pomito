@@ -2,15 +2,14 @@
 # Tests for the Activity hook
 
 import unittest
-from unittest.mock import Mock, patch
-
-from peewee import SqliteDatabase
+from peewee import Using
 
 from pomito.hooks.activity import ActivityHook, ActivityModel
 from pomito.test import PomitoTestFactory
 
 from pyfakefs import fake_filesystem
 import sure
+
 
 class ActivityHookTests(unittest.TestCase):
     def setUp(self):
@@ -22,23 +21,19 @@ class ActivityHookTests(unittest.TestCase):
         test_factory.create_patch(self, 'os.path', os_module.path)
         test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
-        ActivityModel.drop_table(True)
-
         self.pomodoro_service = test_factory.create_fake_service()
         self.activityhook = ActivityHook(self.pomodoro_service)
         self.activityhook.initialize()
+        self.database = self.pomodoro_service.get_db()
 
     def tearDown(self):
         ActivityModel.drop_table(True)
         self.activityhook.close()
 
     def test_initialize_sets_activity_db(self):
-        activityhook = ActivityHook(self.pomodoro_service)
+        count = ActivityModel.select().count()
 
-        activityhook.initialize()
-
-        ActivityHook.activity_db.shouldnt.be.equal(None)
-        activityhook.close()
+        count.should.be.equal(0)
 
     def test_initialize_creates_signal_handlers(self):
         activityhook = ActivityHook(self.pomodoro_service)
@@ -72,40 +67,36 @@ class ActivityHookTests(unittest.TestCase):
         self.pomodoro_service.start_session(test_task)
         self.pomodoro_service.stop_session()
 
-        ActivityModel.select().where(ActivityModel.category ==\
-                'session').count().should.be.equal(1)
+        activities = ActivityModel.get(ActivityModel.category == 'session')
+        activities.should.not_be.none
 
     def test_log_handles_break_stop_event(self):
         self.pomodoro_service.start_break()
         self.pomodoro_service.stop_break()
 
         self._dump_activity_model()
-        ActivityModel.select().where(ActivityModel.category ==\
-                'break').count().should.be.equal(1)
+        activities = ActivityModel.get(ActivityModel.category == 'break')
+        activities.should.not_be.none
 
     def test_log_handles_interruption_stop_event(self):
         self.pomodoro_service.start_interruption(None, False, False)
         self.pomodoro_service.stop_interruption()
 
-        ActivityModel.select().where(ActivityModel.category ==\
-                'interruption').count().should.be.equal(1)
-        pass
+        act = ActivityModel.get(ActivityModel.category == 'interruption')
+        act.shouldnt.be.none
 
     def _create_task(self, uid, description):
         from pomito.task import Task
-        return Task(uid=uid, description=description, estimate=0, actual=0,
-                tags=None)
-
-    def _get_latest_entry(self):
-        pass
+        return Task(uid=uid, description=description,
+                    estimate=0, actual=0,
+                    tags=None)
 
     def _dump_activity_model(self):
         for activity in ActivityModel.select():
             print("{0};{1};{2}".format(activity.timestamp, activity.category,
-                activity.data))
+                                       activity.data))
 
     def _count_receivers(self, signal):
         from blinker.base import ANY
 
         return sum(1 for r in signal.receivers_for(ANY))
-        
