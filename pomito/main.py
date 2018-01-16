@@ -153,6 +153,9 @@ class Pomito(object):
 
     def initialize(self):
         """Initializes configuration, database and starts worker threads."""
+        if not os.path.exists(DATA_DIR):
+            os.mkdir(DATA_DIR)
+
         database_path = os.path.join(DATA_DIR, "pomito_data.db")
         if not os.path.exists(database_path) and not self._database:
             self._database = SqliteDatabase(None)

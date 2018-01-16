@@ -2,6 +2,7 @@
 # Pomito - Pomodoro timer on steroids
 # Tests for the Main module
 
+import os
 import unittest
 from unittest.mock import Mock
 
@@ -188,6 +189,6 @@ class PomitoTests(unittest.TestCase):
     def _setup_data_dir(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             data_dir = self.main.DATA_DIR
-            self.main.DATA_DIR = tmpdir
+            self.main.DATA_DIR = os.path.join(tmpdir, "pomito")
             yield
             self.main.DATA_DIR = data_dir
