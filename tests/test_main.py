@@ -4,7 +4,7 @@
 
 import os
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 import blinker
 import sure
@@ -141,6 +141,7 @@ class PomitoTests(unittest.TestCase):
         with self._setup_data_dir():
             pomito = self.main.Pomito()
             self._setup_pomito_plugins(pomito)
+            self._setup_mock_sqlite_connect()
 
             pomito.initialize()
 
@@ -162,6 +163,7 @@ class PomitoTests(unittest.TestCase):
             pomito = self.main.Pomito()
             self._setup_pomito_plugins(pomito)
             self._setup_pomito_hooks(pomito)
+            self._setup_mock_sqlite_connect()
 
             pomito.initialize()
 
@@ -185,10 +187,16 @@ class PomitoTests(unittest.TestCase):
     def _setup_pomito_hooks(self, pomito):
         pomito._hooks[0] = Mock(spec=Hook)
 
+    def _setup_mock_sqlite_connect(self):
+        import sqlite3
+        sqlite3.connect = MagicMock()
+
     @contextmanager
     def _setup_data_dir(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             data_dir = self.main.DATA_DIR
             self.main.DATA_DIR = os.path.join(tmpdir, "pomito")
-            yield
-            self.main.DATA_DIR = data_dir
+            try:
+                yield
+            finally:
+                self.main.DATA_DIR = data_dir
