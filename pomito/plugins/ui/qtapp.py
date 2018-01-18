@@ -20,6 +20,9 @@ from pomito.plugins import ui
 from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
+# Required for bundling svg icon support
+from PyQt5 import QtSvg, QtXml  # noqa
+
 QtCore.Signal = QtCore.pyqtSignal
 QtCore.Slot = QtCore.pyqtSlot
 
