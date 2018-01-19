@@ -156,7 +156,7 @@ class Pomito(object):
         if not os.path.exists(DATA_DIR):
             os.makedirs(DATA_DIR)
 
-        database_path = os.path.join(DATA_DIR, "pomito_data.db")
+        database_path = os.path.join(DATA_DIR, "pomito.db")
         if self._database is None:
             self._database = SqliteDatabase(None)
             self._database.init(database_path)
