@@ -5,20 +5,21 @@ Pomito - Pomodoro timer on steroids.
 Implementation of Qt user interface.
 """
 
-from pomito.plugins.ui.qt.qt_timer import Ui_MainWindow
-from pomito.plugins.ui.qt.qt_task import Ui_TaskWindow
-from pomito.plugins.ui.qt.qt_interrupt import Ui_InterruptionWindow
-from pyqtkeybind import keybinder
-
 import datetime
 import logging
 import sys
 
-from pomito.plugins.ui.qt.shell import Taskbar, Tray
-from pomito.task import Task
-from pomito.plugins import ui
+from pyqtkeybind import keybinder
 from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
+
+from pomito.plugins.ui import UIPlugin
+from pomito.plugins.ui.qt.shell import Taskbar, Tray
+from pomito.plugins.ui.qt.qt_timer import Ui_MainWindow
+from pomito.plugins.ui.qt.qt_task import Ui_TaskWindow
+from pomito.plugins.ui.qt.qt_interrupt import Ui_InterruptionWindow
+from pomito.pomodoro import TimerChange
+from pomito.task import Task
 
 # Required for bundling svg icon support
 from PyQt5 import QtSvg, QtXml  # noqa
@@ -29,7 +30,7 @@ QtCore.Slot = QtCore.pyqtSlot
 logger = logging.getLogger("pomito.plugins.ui.qtapp")
 
 
-class QtUI(ui.UIPlugin):
+class QtUI(UIPlugin):
     def __init__(self, pomodoro_service):
         self._pomodoro_service = pomodoro_service
 
@@ -228,7 +229,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         label += "Spent {0:02d}:{1:02d}:{2:02d}hrs in interruptions".format(int(self._interrupt_duration / 60 / 60),
                                                                             int(self._interrupt_duration / 60),
                                                                             self._interrupt_duration % 60)
-        if not text is None:
+        if text is not None:
             label = text
 
         label = QtUtilities.getElidedText(self.activity_label.rect(), self.activity_label.font(), label)
@@ -238,7 +239,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.Slot(str, bool, bool)
     def interrupt_selected(self, reason, is_external, add_unplanned_task):
         # Uncheck state if user opened interrupt window but closed it
-        if reason is None or reason is "":
+        if reason is None:
             self.btn_interrupt.setChecked(False)
             return
 
@@ -302,7 +303,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._last_session_timestamp = datetime.datetime.now()
 
         reason = "Ouch! Interrupted."
-        if kwargs["reason"] == "complete":
+        if kwargs["reason"] == TimerChange.COMPLETE:
             self._session_count += 1
             reason = "Done done."
 

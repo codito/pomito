@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Tests for pomodoro service."""
 import os
 import sys
 import time
@@ -15,7 +16,8 @@ import sure
 
 
 class PomodoroServiceTests(unittest.TestCase):
-    """
+    """Tests for pomodoro service.
+
     - test_break_stopped_without_start
     - test_session_stopped_without_start
     - test_interruption_stopped_without_start
@@ -24,6 +26,7 @@ class PomodoroServiceTests(unittest.TestCase):
     - test_get_config_throws_for_invalid_key
     - test_get_config_throws_for_invalid_inifile
     """
+
     def setUp(self):
         test_factory = PomitoTestFactory()
         self.pomodoro_service = test_factory.create_fake_service()
@@ -136,7 +139,8 @@ class PomodoroServiceTests(unittest.TestCase):
 
         self.dummy_callback.\
             assert_called_once_with(None, session_count=0,
-                                    task=self.dummy_task, reason='interrupt')
+                                    task=self.dummy_task,
+                                    reason=pomodoro.TimerChange.INTERRUPT)
 
         self.pomodoro_service.signal_session_stopped \
             .disconnect(self.dummy_callback)
@@ -146,21 +150,21 @@ class PomodoroServiceTests(unittest.TestCase):
             .connect(self.dummy_callback, weak=False)
 
         self.pomodoro_service.start_session(self.dummy_task)
-        self.pomodoro_service._timer.trigger_callback('complete')
+        self.pomodoro_service._timer.trigger_callback(pomodoro.TimerChange.COMPLETE)
 
         self.dummy_callback.assert_called_once_with(None, session_count=1,
                                                     task=self.dummy_task,
-                                                    reason='complete')
+                                                    reason=pomodoro.TimerChange.COMPLETE)
 
         self.pomodoro_service.signal_session_stopped\
             .disconnect(self.dummy_callback)
 
     def test_break_started_shortbreak(self):
-        self._test_break_started("short_break")
+        self._test_break_started(pomodoro.TimerType.SHORT_BREAK)
 
     def test_break_started_longbreak(self):
         self.pomodoro_service._session_count = 4
-        self._test_break_started("long_break")
+        self._test_break_started(pomodoro.TimerType.LONG_BREAK)
 
     def _test_break_started(self, break_type):
         self.pomodoro_service.signal_break_started \
@@ -180,11 +184,11 @@ class PomodoroServiceTests(unittest.TestCase):
             .connect(self.dummy_callback, weak=False)
 
         self.pomodoro_service.start_break()
-        self.pomodoro_service._timer.trigger_callback('complete')
+        self.pomodoro_service._timer.trigger_callback(pomodoro.TimerChange.COMPLETE)
 
         self.dummy_callback.assert_called_once_with(None,
-                                                    break_type='short_break',
-                                                    reason='complete')
+                                                    break_type=pomodoro.TimerType.SHORT_BREAK,
+                                                    reason=pomodoro.TimerChange.COMPLETE)
 
         self.pomodoro_service.signal_break_stopped\
             .disconnect(self.dummy_callback)
@@ -197,8 +201,8 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service.stop_break()
 
         self.dummy_callback.assert_called_once_with(None,
-                                                    break_type='short_break',
-                                                    reason='interrupt')
+                                                    break_type=pomodoro.TimerType.SHORT_BREAK,
+                                                    reason=pomodoro.TimerChange.INTERRUPT)
 
         self.pomodoro_service.signal_break_stopped\
             .disconnect(self.dummy_callback)
@@ -212,8 +216,8 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service.stop_break()
 
         self.dummy_callback.assert_called_once_with(None,
-                                                    break_type='long_break',
-                                                    reason='interrupt')
+                                                    break_type=pomodoro.TimerType.LONG_BREAK,
+                                                    reason=pomodoro.TimerChange.INTERRUPT)
 
         self.pomodoro_service.signal_break_stopped\
             .disconnect(self.dummy_callback)
@@ -281,7 +285,7 @@ class TimerTests(unittest.TestCase):
 
         self.mock_callback.call_count.should.be.equal(2)
         self.assertListEqual(self.mock_callback.call_args_list,
-                             [(('increment',), {}), (('complete',), {})],
+                             [((pomodoro.TimerChange.INCREMENT,), {}), ((pomodoro.TimerChange.COMPLETE,), {})],
                              'invalid notify_reason')
 
     def test_mock_callback_reason_interrupt(self):
@@ -293,8 +297,34 @@ class TimerTests(unittest.TestCase):
 
         self.mock_callback.call_count.should.be.equal(1)
         self.assertListEqual(self.mock_callback.call_args_list,
-                             [(('interrupt',), {})],
+                             [((pomodoro.TimerChange.INTERRUPT,), {})],
                              'invalid notify_reason')
+
+    def test_start_throws_when_called_on_same_thread(self):
+        def callback_with_catch(reason):
+            try:
+                timer.start()
+                assert False    # expect previous call to throw
+            except RuntimeError:
+                pass
+        timer = pomodoro.Timer(10, callback_with_catch, 1)
+
+        timer.start()
+        timer.stop()
+        time.sleep(0.1)
+
+    def test_stop_throws_when_called_on_same_thread(self):
+        def callback_with_catch(reason):
+            try:
+                timer.stop()
+                assert False    # expect previous call to throw
+            except RuntimeError:
+                pass
+        timer = pomodoro.Timer(10, callback_with_catch, 1)
+
+        timer.start()
+        timer.stop()
+        time.sleep(0.1)
 
     @nose.plugins.attrib.attr("perf")
     def test_callback_granular(self):
@@ -308,12 +338,13 @@ class TimerTests(unittest.TestCase):
         timer.start()
         time.sleep(duration + 2)
 
-        self.reason.should.equal('complete')
+        self.reason.should.equal(pomodoro.TimerChange.COMPLETE)
         self.assertAlmostEqual(self.delta, duration, delta=delta_granular)
 
 
 class DummyUIPlugin(UIPlugin):
     def __init__(self):
+        """Create an instance of dummy plugin."""
         self.timestamp = 100.0
         return
 

@@ -5,18 +5,35 @@
 import logging
 import threading
 import blinker
+from enum import Enum
 
-from .main import Message
-from .plugins import get_plugin, get_plugins
-from .plugins.task import TaskPlugin
+from pomito.main import Message
+from pomito.plugins import get_plugin, get_plugins
+from pomito.plugins.task import TaskPlugin
 
 logger = logging.getLogger('pomito.service')
 
 
-class Pomodoro(object):
+class TimerType(Enum):
+    """Supported timer types in pomito."""
 
-    """Basic services provided by the pomodoro application fall into these
-    categories:
+    SESSION = 'session'
+    SHORT_BREAK = 'short_break'
+    LONG_BREAK = 'long_break'
+    INTERRUPT = 'interruption'
+
+
+class TimerChange(Enum):
+    """Supported timer change reasons in pomito."""
+
+    INCREMENT = 'increment'
+    COMPLETE = 'complete'
+    INTERRUPT = 'interrupt'
+
+
+class Pomodoro(object):
+    """Basic services provided by the pomodoro application.
+
         - Config management: handled by lower layer (main.Pomito), we act as
         proxy and bubble them to user
         - Database management: handled by peewee, wraps around a in application
@@ -49,16 +66,17 @@ class Pomodoro(object):
     signal_interruption_started = blinker.signal('interruption_started')
     signal_interruption_stopped = blinker.signal('interruption_stopped')
 
-    def __init__(self, pomito_instance,
-                 create_timer=lambda duration, callback, interval=1:\
-                         Timer(duration, callback, interval)):
+    def _get_timer(duration, callback, interval=1):
+        return Timer(duration, callback, interval)
+
+    def __init__(self, pomito_instance, create_timer=_get_timer):
         self._pomito_instance = pomito_instance
         self._session_count = 0
         self._create_timer = create_timer
         self._timer = self._create_timer(self._pomito_instance.session_duration,
                                          self._update_state)
         # other values = "{short, long}_break", "interruption"
-        self._timer_type = "session"
+        self._timer_type = TimerType.SESSION
         self.current_task = None
 
     def _stop_timer(self):
@@ -98,8 +116,7 @@ class Pomodoro(object):
             task_filter: string to match task attributes
 
         See TaskPlugin.get_tasks_by_filter."""
-        return self._pomito_instance\
-            .task_plugin.get_tasks_by_filter(task_filter)
+        return self._pomito_instance.task_plugin.get_tasks_by_filter(task_filter)
 
     def get_task_by_id(self, task_id):
         """Gets all tasks with id matching task id.
@@ -121,7 +138,7 @@ class Pomodoro(object):
             raise Exception("Cannot start a session without a valid task!")
 
         self.current_task = task
-        self._timer_type = "session"
+        self._timer_type = TimerType.SESSION
         self._timer = self._create_timer(self._pomito_instance.session_duration,
                                          self._update_state)
         msg = Message(self.signal_session_started,
@@ -144,10 +161,10 @@ class Pomodoro(object):
         sessions.
         """
         if self._session_count == self._pomito_instance.long_break_frequency:
-            self._timer_type = "long_break"
+            self._timer_type = TimerType.LONG_BREAK
             _duration = self._pomito_instance.long_break_duration
         else:
-            self._timer_type = "short_break"
+            self._timer_type = TimerType.SHORT_BREAK
             _duration = self._pomito_instance.short_break_duration
         self._timer = self._create_timer(_duration, self._update_state)
         msg = Message(self.signal_break_started, break_type=self._timer_type)
@@ -183,27 +200,27 @@ class Pomodoro(object):
         This method queues the signals into the dispatcher queue.
         """
         msg = None
-        if notify_reason == "increment":
+        if notify_reason == TimerChange.INCREMENT:
             self.signal_timer_increment.send(self._timer.time_elapsed)
-        elif notify_reason == "complete":
-            if self._timer_type == "session":
+        elif notify_reason == TimerChange.COMPLETE:
+            if self._timer_type == TimerType.SESSION:
                 self._session_count += 1
                 msg = Message(
                     self.signal_session_stopped,
                     session_count=self._session_count, task=self.current_task,
                     reason=notify_reason)
-            elif self._timer_type.endswith("_break"):
+            elif self._timer_type == TimerType.SHORT_BREAK or self._timer_type == TimerType.LONG_BREAK:
                 msg = Message(self.signal_break_stopped,
                               break_type=self._timer_type,
                               reason=notify_reason)
-        elif notify_reason == "interrupt":
-            if self._timer_type == "session":
+        elif notify_reason == TimerChange.INTERRUPT:
+            if self._timer_type == TimerType.SESSION:
                 # TODO cancel session w/ task. Start interruption timer?
                 msg = Message(
                     self.signal_session_stopped,
                     session_count=self._session_count, task=self.current_task,
                     reason=notify_reason)
-            elif self._timer_type.endswith("_break"):
+            elif self._timer_type == TimerType.SHORT_BREAK or self._timer_type == TimerType.LONG_BREAK:
                 msg = Message(
                     self.signal_break_stopped, break_type=self._timer_type,
                     reason=notify_reason)
@@ -211,8 +228,8 @@ class Pomodoro(object):
                 msg = Message(self.signal_interruption_stopped,
                               duration=self._timer.time_elapsed)
         else:
-            raise Exception(
-                "Invalid state. Notify reason = {0}.".format(notify_reason))
+            msg = "Invalid state. Notify reason = {0}.".format(notify_reason)
+            raise Exception(msg)
         if msg is not None:
             self._pomito_instance.queue_signal(msg)
 
@@ -246,23 +263,20 @@ class Timer(threading.Thread):
         self.duration = duration
         self.time_elapsed = interval
         self._interval = interval
-        self._notify_reason = "complete"
+        self._notify_reason = TimerChange.COMPLETE
         self._parent_callback = callback
         self._finished = threading.Event()
-
-    def is_running(self):
-        return not self._finished.is_set()
 
     def start(self):
         if threading.currentThread() == self:
             raise RuntimeError("Cannot call start on the timer thread itself.")
-        self._notify_reason = "increment"
+        self._notify_reason = TimerChange.INCREMENT
         threading.Thread.start(self)
 
     def stop(self):
         if threading.currentThread() == self:
             raise RuntimeError("Cannot call stop on the timer thread itself.")
-        self._notify_reason = "interrupt"
+        self._notify_reason = TimerChange.INTERRUPT
         self._finished.set()
 
     def run(self):
@@ -271,7 +285,7 @@ class Timer(threading.Thread):
             self._finished.wait(self._interval)
 
             if self.time_elapsed == self.duration:
-                self._notify_reason = "complete"
+                self._notify_reason = TimerChange.COMPLETE
                 self._finished.set()
             else:
                 self.time_elapsed += self._interval

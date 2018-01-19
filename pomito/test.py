@@ -34,10 +34,10 @@ class FakeTimer(object):
 
     def start(self):
         self._alive = True
-        self._parent_callback('increment')
+        self._parent_callback(pomodoro.TimerChange.INCREMENT)
 
     def stop(self):
-        self._parent_callback('interrupt')
+        self._parent_callback(pomodoro.TimerChange.INTERRUPT)
 
     def trigger_callback(self, notify_reason):
         """Trigger a callback with given reason. Test only function."""

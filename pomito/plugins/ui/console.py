@@ -143,4 +143,3 @@ Type 'help' or '?' to list available commands."
         except KeyboardInterrupt:
             self._print_message("Got keyboard interrupt.")
         return
-
