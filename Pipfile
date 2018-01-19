@@ -21,15 +21,14 @@ pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true,
 coveralls = "*"
 cx-freeze = "*"
 "flake8" = "*"
-mock = "*"
 nose = "*"
-nose-pudb = "*"
-nose-watch = "*"
-pudb = "*"
-pydocstyle = "*"
 pyfakefs = "*"
 rednose = "*"
 sure = "*"
+"flake8-docstrings" = "*"
+"flake8-per-file-ignores" = "*"
+mkdocs = "*"
+mkdocs-material = "*"
 
 
 [requires]
