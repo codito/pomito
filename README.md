@@ -4,7 +4,7 @@ pomito
 [![Build Status](https://img.shields.io/travis/codito/pomito.svg)](https://travis-ci.org/codito/pomito)
 [![Windows Build status](https://img.shields.io/appveyor/ci/codito/pomito.svg)](https://ci.appveyor.com/project/codito/pomito)
 [![Coverage Status](https://img.shields.io/coveralls/github/codito/pomito.svg)](https://coveralls.io/r/codito/pomito?branch=master)
-[![Code Health](https://landscape.io/github/codito/pomito/master/landscape.svg)](https://landscape.io/github/codito/pomito/master)
+[![Code Health](https://landscape.io/github/codito/pomito/master/landscape.svg?style=flat)](https://landscape.io/github/codito/pomito/master)
 
 Simple pomodoro timer with support for tasks and hooks.
 
