@@ -1,0 +1,11 @@
+site_name: Pomito
+
+pages:
+  - Overview: 'index.md'
+  - Configuration: 'config.md'
+
+theme:
+  name: "material"
+  palette:
+    primary: 'light blue'
+    accent: 'deep orange'
