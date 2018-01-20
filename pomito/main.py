@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Pomito - Pomodoro timer on steroids
-# Main interaction class
+"""Main interaction class."""
 
 import logging
 import os
@@ -26,7 +26,9 @@ logger = logging.getLogger(PACKAGE_NAME)
 
 
 class Message(object):
-    """A wrapper for signals/parameters to be sent across plugins via the dispatcher"""
+    """A wrapper for signals/parameters to be sent across plugins via the
+    dispatcher."""
+
     def __init__(self, signal, **kwargs):
         self.signal = signal
         self.kwargs = kwargs
@@ -37,6 +39,7 @@ class Message(object):
 
 class MessageDispatcher(threading.Thread):
     """Simple queue based message dispatcher."""
+
     def __init__(self):
         threading.Thread.__init__(self)
 
@@ -69,13 +72,13 @@ class MessageDispatcher(threading.Thread):
             raise TypeError("Only objects of type Message can be queued.")
         if message.signal.receivers:
             logger.info("MessageDispatcher: added message: " +
-                    message.kwargs.__str__())
+                        message.kwargs.__str__())
             logger.debug("MessageDispatcher: receivers: " +
-                    message.signal.receivers.__str__())
+                         message.signal.receivers.__str__())
             self._message_queue.put(message)
         else:
             logger.info("MessageDispatcher: skipped message: " +
-                    message.kwargs.__str__())
+                        message.kwargs.__str__())
 
     def run(self):
         """Worker for the message dispatcher thread."""
@@ -87,9 +90,9 @@ class MessageDispatcher(threading.Thread):
                 # not present during enqueue of the message, how ever is present
                 # now. YAGNI call for the moment.
                 logger.debug("MessageDispatcher: dispatch message: " +
-                        message.kwargs.__str__())
+                             message.kwargs.__str__())
                 logger.debug("MessageDispatcher: receivers: " +
-                        message.signal.receivers.__str__())
+                             message.signal.receivers.__str__())
                 message.send()
                 logger.debug("MessageDispatcher: message dispatched!")
                 self._message_queue.task_done()
@@ -106,8 +109,8 @@ class Pomito(object):
     """
 
     def __init__(self, config_file=None, database=None,
-            create_message_dispatcher=lambda: MessageDispatcher()):
-        """Creates a Pomito object.
+                 create_message_dispatcher=lambda: MessageDispatcher()):
+        """Create a Pomito object.
 
         Arguments:
             config_file string  Path to the configuration file
@@ -152,9 +155,9 @@ class Pomito(object):
         return
 
     def initialize(self):
-        """Initializes configuration, database and starts worker threads."""
-        if not os.path.exists(DATA_DIR):
-            os.makedirs(DATA_DIR)
+        """Initialize configuration, database and starts worker threads."""
+        # if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR, exist_ok=True)
 
         database_path = os.path.join(DATA_DIR, "pomito.db")
         if self._database is None:

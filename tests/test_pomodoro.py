@@ -4,14 +4,14 @@ import os
 import sys
 import time
 import unittest
+import pytest
+
 from unittest.mock import Mock
 
 from pomito import main, pomodoro, task
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 from pomito.test import PomitoTestFactory
-
-import nose
 
 
 class PomodoroServiceTests(unittest.TestCase):
@@ -235,7 +235,7 @@ class PomodoroServiceTests(unittest.TestCase):
 
         assert pomodoro_service.get_db() == test_db
 
-    @nose.plugins.attrib.attr("perf")
+    @pytest.mark.perf
     def test_session_started_perf(self):
         t = Mock(spec=task.Task)
         pomito = main.Pomito(None)
@@ -321,7 +321,7 @@ class TimerTests(unittest.TestCase):
         timer.stop()
         time.sleep(0.1)
 
-    @nose.plugins.attrib.attr("perf")
+    @pytest.mark.perf
     def test_callback_granular(self):
         duration = 60.00
         delta_granular = 1.0    # windows

@@ -4,7 +4,7 @@
 
 import os
 import unittest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 
 import blinker
 import tempfile
@@ -146,9 +146,9 @@ class PomitoTests(unittest.TestCase):
         with self._setup_data_dir():
             pomito = self.main.Pomito()
             self._setup_pomito_plugins(pomito)
-            self._setup_mock_sqlite_connect()
 
-            pomito.initialize()
+            with patch('sqlite3.connect', MagicMock()):
+                pomito.initialize()
 
             assert pomito.get_db() is not None
             pomito.exit()
@@ -158,7 +158,8 @@ class PomitoTests(unittest.TestCase):
         pomito = self.main.Pomito(database=dummy_db)
         self._setup_pomito_plugins(pomito)
 
-        pomito.initialize()
+        with patch('sqlite3.connect', MagicMock()):
+            pomito.initialize()
 
         assert pomito.get_db() == dummy_db
         pomito.exit()
@@ -168,9 +169,9 @@ class PomitoTests(unittest.TestCase):
             pomito = self.main.Pomito()
             self._setup_pomito_plugins(pomito)
             self._setup_pomito_hooks(pomito)
-            self._setup_mock_sqlite_connect()
 
-            pomito.initialize()
+            with patch('sqlite3.connect', MagicMock()):
+                pomito.initialize()
 
             assert pomito.ui_plugin.initialize.call_count == 1
             assert pomito.task_plugin.initialize.call_count == 1
@@ -191,10 +192,6 @@ class PomitoTests(unittest.TestCase):
 
     def _setup_pomito_hooks(self, pomito):
         pomito._hooks[0] = Mock(spec=Hook)
-
-    def _setup_mock_sqlite_connect(self):
-        import sqlite3
-        sqlite3.connect = MagicMock()
 
     @contextmanager
     def _setup_data_dir(self):

@@ -12,6 +12,6 @@ install:
   - pip install pipenv
   - pipenv install --dev
 
-script: pipenv run nosetests
+script: pipenv run pytest
 
 after_success: pipenv run coveralls

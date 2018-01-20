@@ -23,6 +23,7 @@ class AsanaTests(unittest.TestCase):
         filesystem = fake_filesystem.FakeFilesystem()
         cls.os_module = fake_filesystem.FakeOsModule(filesystem)
         cls.fileopen = fake_filesystem.FakeFileOpen(filesystem)
+
         fake_config_file = filesystem.CreateFile(cls.test_factory.config_file)
         fake_config_file.SetContents("""[task.asana]
                                      api_key = dummy_key
@@ -31,6 +32,7 @@ class AsanaTests(unittest.TestCase):
     def setUp(self):
         # Patch filesystem calls with fake implementations
         self.test_factory.create_patch(self, 'os.path', self.os_module.path)
+        self.test_factory.create_patch(self, 'os.makedirs', self.os_module.makedirs)
         self.test_factory.create_patch(self, 'builtins.open', self.fileopen)
 
         self.pomodoro_service = self.test_factory.create_fake_service()
