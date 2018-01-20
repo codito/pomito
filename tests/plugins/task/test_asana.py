@@ -1,17 +1,15 @@
 """Tests for asana task plugin."""
 
 import unittest
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock
 
 from asana.asana import AsanaAPI
 from pyfakefs import fake_filesystem
-from sure import expect
 
 from pomito.plugins.task.asana import AsanaTask
-from pomito.task import Task
-from pomito.test import FakeMessageDispatcher, PomitoTestFactory
+from pomito.test import PomitoTestFactory
 
-# pylint: skip-file
+
 class AsanaTests(unittest.TestCase):
     dummy_workspace_list = [{'id': 1, 'name': "ws1"}, {'id': 2, 'name': "ws2"}]
     dummy_task_list = [{'id': 1, 'name': "task1"}, {'id': 2, 'name': "task2"}]
@@ -45,10 +43,10 @@ class AsanaTests(unittest.TestCase):
         self.pomodoro_service._pomito_instance.exit()
 
     def test_asana_can_create_asana_plugin(self):
-        expect(self.asana).to_not.be.none
+        assert self.asana is not None
 
     def test_asana_raises_valueerror_for_no_pomodoro_service(self):
-        expect(AsanaTask).when.called_with(None).to.throw(ValueError)
+        self.assertRaises(ValueError, AsanaTask, None)
 
     def test_initialize_reads_api_key_from_config_file(self):
         # Create a mock factory to create AsanaAPI object
@@ -63,18 +61,16 @@ class AsanaTests(unittest.TestCase):
         # Set _get_asana_api as None to ensure initialize throws
         a = AsanaTask(self.pomodoro_service, None)
 
-        expect(a.initialize).when.called.to_not.throw()
+        a.initialize()
 
     def test_initialize_does_not_throw_for_default_get_asana_api(self):
         a = AsanaTask(self.pomodoro_service)
 
-        expect(a.initialize).when.called.to_not.throw()
+        a.initialize()
 
     def test_get_tasks_does_not_throw_without_initialize(self):
         # Set asana_api as None so that AttributeError is thrown
-        x = lambda: list(self.asana.get_tasks())
-
-        expect(x).when.called.to_not.throw()
+        assert list(self.asana.get_tasks()) is not None
 
     def test_get_tasks_returns_list_of_task_objects(self):
         self.asana_api.list_workspaces\
@@ -84,12 +80,12 @@ class AsanaTests(unittest.TestCase):
 
         tasks = list(self.asana.get_tasks())
 
-        expect(len(tasks)).to.equal(1)
-        expect(tasks[0].uid).to.equal(1)
-        expect(tasks[0].description).to.equal("t")
-        expect(tasks[0].estimate).to.equal(0)
-        expect(tasks[0].actual).to.equal(0)
-        expect(tasks[0].tags).to.be.none
+        assert len(tasks) == 1
+        assert tasks[0].uid == 1
+        assert tasks[0].description == "t"
+        assert tasks[0].estimate == 0
+        assert tasks[0].actual == 0
+        assert tasks[0].tags is None
 
     def test_get_tasks_gets_tasks_from_all_workspaces(self):
         self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
@@ -99,7 +95,7 @@ class AsanaTests(unittest.TestCase):
         tasks = list(self.asana.get_tasks())
 
         self.asana_api.list_workspaces.assert_called_once_with()
-        expect(len(tasks)).to.equal(4)
+        assert len(tasks) == 4
 
     def test_get_tasks_only_gets_tasks_assigned_to_me(self):
         self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
@@ -107,7 +103,8 @@ class AsanaTests(unittest.TestCase):
 
         tasks = list(self.asana.get_tasks())
 
-        expect(self.asana_api.list_tasks.call_count).to.equal(2)
+        assert tasks is not None
+        assert self.asana_api.list_tasks.call_count == 2
         self.asana_api.list_tasks.assert_any_call(1, "me")
         self.asana_api.list_tasks.assert_any_call(2, "me")
 
@@ -117,7 +114,7 @@ class AsanaTests(unittest.TestCase):
 
         tasks = list(self.asana.get_tasks())
 
-        expect(tasks).to.equal([])
+        assert tasks == []
 
     def test_get_tasks_returns_empty_list_for_no_tasks(self):
         self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
@@ -125,4 +122,4 @@ class AsanaTests(unittest.TestCase):
 
         tasks = list(self.asana.get_tasks())
 
-        expect(tasks).to.equal([])
+        assert tasks == []

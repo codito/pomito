@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-# Tests for the Activity hook
+"""Tests for the Activity hook."""
 
 import unittest
-from peewee import Using
 
 from pomito.hooks.activity import ActivityHook, ActivityModel
 from pomito.test import PomitoTestFactory
 
 from pyfakefs import fake_filesystem
-import sure
 
 
 class ActivityHookTests(unittest.TestCase):
@@ -33,19 +31,16 @@ class ActivityHookTests(unittest.TestCase):
     def test_initialize_sets_activity_db(self):
         count = ActivityModel.select().count()
 
-        count.should.be.equal(0)
+        assert count == 0
 
     def test_initialize_creates_signal_handlers(self):
         activityhook = ActivityHook(self.pomodoro_service)
 
         activityhook.initialize()
 
-        self._count_receivers(self.pomodoro_service.signal_session_stopped)\
-            .should.be.equal(2)
-        self._count_receivers(self.pomodoro_service.signal_break_stopped)\
-            .should.be.equal(2)
-        self._count_receivers(self.pomodoro_service.signal_interruption_stopped)\
-            .should.be.equal(2)
+        assert self._receivers(self.pomodoro_service.signal_session_stopped, 2)
+        assert self._receivers(self.pomodoro_service.signal_break_stopped, 2)
+        assert self._receivers(self.pomodoro_service.signal_interruption_stopped, 2)
         activityhook.close()
 
     def test_close_disconnects_signal_handlers(self):
@@ -55,12 +50,9 @@ class ActivityHookTests(unittest.TestCase):
         activityhook.close()
 
         # Count is one because there is already a listener for self.activityhook
-        self._count_receivers(self.pomodoro_service.signal_session_stopped)\
-            .should.be.equal(1)
-        self._count_receivers(self.pomodoro_service.signal_break_stopped)\
-            .should.be.equal(1)
-        self._count_receivers(self.pomodoro_service.signal_interruption_stopped)\
-            .should.be.equal(1)
+        assert self._receivers(self.pomodoro_service.signal_session_stopped, 1)
+        assert self._receivers(self.pomodoro_service.signal_break_stopped, 1)
+        assert self._receivers(self.pomodoro_service.signal_interruption_stopped, 1)
 
     def test_log_handles_session_stop_event(self):
         test_task = self._create_task(100, 'session_start_task')
@@ -68,7 +60,7 @@ class ActivityHookTests(unittest.TestCase):
         self.pomodoro_service.stop_session()
 
         activities = ActivityModel.get(ActivityModel.category == 'session')
-        activities.should.not_be.none
+        assert activities is not None
 
     def test_log_handles_break_stop_event(self):
         self.pomodoro_service.start_break()
@@ -76,14 +68,14 @@ class ActivityHookTests(unittest.TestCase):
 
         self._dump_activity_model()
         activities = ActivityModel.get(ActivityModel.category == 'break')
-        activities.should.not_be.none
+        assert activities is not None
 
     def test_log_handles_interruption_stop_event(self):
         self.pomodoro_service.start_interruption(None, False, False)
         self.pomodoro_service.stop_interruption()
 
         act = ActivityModel.get(ActivityModel.category == 'interruption')
-        act.shouldnt.be.none
+        assert act is not None
 
     def _create_task(self, uid, description):
         from pomito.task import Task
@@ -96,7 +88,7 @@ class ActivityHookTests(unittest.TestCase):
             print("{0};{1};{2}".format(activity.timestamp, activity.category,
                                        activity.data))
 
-    def _count_receivers(self, signal):
+    def _receivers(self, signal, count):
         from blinker.base import ANY
 
-        return sum(1 for r in signal.receivers_for(ANY))
+        return sum(1 for r in signal.receivers_for(ANY)) == count

@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-# Tests for the Task module
+"""Tests for the Task module."""
 
 import unittest
 import pomito.task
 
-import sure
-
 
 class TaskTests(unittest.TestCase):
-    """TODO: incomplete"""
+    """TODO: incomplete."""
+
     task_description = "A Simple Task"
     task_estimate_pomodoros = "20"
     task_actual_pomodoros = 100
@@ -22,55 +21,49 @@ class TaskTests(unittest.TestCase):
                                  task_description)
 
     def test_task_should_set_attributes(self):
-        self.test_task.description.should.be.equal(self.task_description)
-        self.test_task.estimate.should.be.equal(int(self.task_estimate_pomodoros))
-        self.test_task.actual.should.be.equal(self.task_actual_pomodoros)
-        self.test_task.tags.should.be.equal(self.task_tags)
-        self.test_task.uid.should.be.equal(self.task_uid)
+        assert self.test_task.description == self.task_description
+        assert self.test_task.estimate == int(self.task_estimate_pomodoros)
+        assert self.test_task.actual == self.task_actual_pomodoros
+        assert self.test_task.tags == self.task_tags
+        assert self.test_task.uid == self.task_uid
 
     def test_task_should_throw_on_invalid_task(self):
-        _task = lambda: pomito.task.Task(self.task_uid,
-                                         "invalid estimate",
-                                         self.task_actual_pomodoros,
-                                         self.task_tags,
-                                         self.task_description)
-
-        _task.when.called_with().should.throw(Exception)
+        self.assertRaises(Exception, pomito.task.Task, self.task_uid,
+                          "invalid estimate", self.task_actual_pomodoros,
+                          self.task_tags, self.task_description)
 
     def test_task_uid_is_set_if_uid_parameter_is_none(self):
-        _task = pomito.task.Task(None,
-                                 self.task_estimate_pomodoros,
-                                 self.task_actual_pomodoros,
-                                 self.task_tags,
-                                 self.task_description)
+        t = pomito.task.Task(None,
+                             self.task_estimate_pomodoros,
+                             self.task_actual_pomodoros,
+                             self.task_tags,
+                             self.task_description)
 
-        _task.uid.should_not.be.none
+        assert t.uid is not None
 
     def test_task_update_actual_increases_actual_pomodoros_by_one(self):
         self.test_task.update_actual()
 
-        self.test_task.actual.should.be(self.task_actual_pomodoros + 1)
+        assert self.test_task.actual == self.task_actual_pomodoros + 1
 
     def test_task_update_estimate_sets_task_estimate(self):
         self.test_task.update_estimate(99)
 
-        self.test_task.estimate.should.be(99)
+        assert self.test_task.estimate == 99
 
     def test_task_update_estimate_raises_if_estimate_is_not_int(self):
-        _update = lambda: self.test_task.update_estimate("abc")
-
-        _update.when.called_with().should.throw(ValueError)
+        self.assertRaises(ValueError, self.test_task.update_estimate, "abc")
 
     def test_task_mark_complete_sets_completed_to_one(self):
         self.test_task.mark_complete()
 
-        self.test_task.completed.should.be(1)
+        assert self.test_task.completed == 1
 
     def test_get_null_task_returns_dummy_task(self):
         dummy_task = pomito.task.get_null_task()
 
-        dummy_task.actual.should.be(0)
-        dummy_task.completed.should.be(0)
-        dummy_task.description.should.equal("No task selected.")
-        dummy_task.estimate.should.be(0)
-        dummy_task.tags.should.be(None)
+        assert dummy_task.actual == 0
+        assert dummy_task.completed == 0
+        assert dummy_task.description == "No task selected."
+        assert dummy_task.estimate == 0
+        assert dummy_task.tags is None

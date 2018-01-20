@@ -1,17 +1,16 @@
-"""Tests for console user interface
-"""
+# -*- coding: utf-8 -*-
+"""Tests for console user interface."""
 
 import unittest
 from unittest.mock import Mock, MagicMock
 
 from click.testing import CliRunner
-from sure import expect
 
 from pomito import task
-from pomito.plugins.ui.console import *
+from pomito.plugins.ui.console import Console, pomito_shell
 from pomito.test import FakeTaskPlugin, PomitoTestFactory
 
-# pylint: disable=too-many-public-methods, invalid-name, missing-docstring
+
 class ConsoleTests(unittest.TestCase):
     """Test suite for shell."""
 
@@ -38,28 +37,28 @@ class ConsoleTests(unittest.TestCase):
         self.dummy_callback = Mock()
 
     def tearDown(self):
-        # pylint: disable=protected-access
         self.pomodoro_service._pomito_instance.exit()
 
     def test_completenames_should_list_matching_commands(self):
         names = self.console.completenames("st")
-        expect(names).to.equal(["start", "stop"])
+        assert names == ["start", "stop"]
 
     def test_completenames_should_not_list_not_match_commands(self):
         names = self.console.completenames("nonexist")
-        expect(names).to.equal([])
+        assert names == []
 
     def test_completenames_should_not_list_shell(self):
         names = self.console.completenames("")
-        expect(names).to_not.contain("shell")
+        assert "shell" not in names
 
     def test_shell_text_should_be_pomito(self):
-        expect(self.console.prompt).to.equal("pomito> ")
+        assert self.console.prompt == "pomito> "
 
     def test_shell_provides_start_command(self):
         out = self._invoke_command("start", "0")
-        expect(out.exception).to.be.none
-        out.exit_code.should.be.equal(0)
+
+        assert out.exception is None
+        assert out.exit_code == 0
 
     def test_list_prints_first_ten_available_tasks(self):
         more_task_msg = "\nShowing first 10 tasks, use `list *`"\
@@ -68,8 +67,8 @@ class ConsoleTests(unittest.TestCase):
 
         out = self._invoke_command("list")
 
-        expect(out.exit_code).to.equal(0)
-        expect(out.output).to.equal(expected_out + more_task_msg)
+        assert out.exit_code == 0
+        assert out.output == expected_out + more_task_msg
 
     def test_list_prints_tasks_matching_filter(self):
         expected_task_list = [self.task_list[1], self.task_list[10],
@@ -78,16 +77,16 @@ class ConsoleTests(unittest.TestCase):
 
         out = self._invoke_command("list", "1")
 
-        expect(out.exit_code).to.equal(0)
-        expect(out.output).to.equal(expected_out)
+        assert out.exit_code == 0
+        assert out.output == expected_out
 
     def test_list_star_prints_all_tasks(self):
         expected_out = "\n".join(map(str, self.task_list)) + "\n"
 
         out = self._invoke_command("list", "*")
 
-        expect(out.exit_code).to.equal(0)
-        expect(out.output).to.equal(expected_out)
+        assert out.exit_code == 0
+        assert out.output == expected_out
 
     def test_start_starts_a_pomodoro_session(self):
         self.pomodoro_service.signal_session_started\
@@ -95,8 +94,8 @@ class ConsoleTests(unittest.TestCase):
 
         out = self._invoke_command("start", "0")
 
-        expect(out.exit_code).to.be(0)
-        expect(self.dummy_callback.call_count).to.equal(1)
+        assert out.exit_code == 0
+        assert self.dummy_callback.call_count == 1
 
         self.pomodoro_service.signal_session_started\
             .disconnect(self.dummy_callback)
@@ -107,8 +106,8 @@ class ConsoleTests(unittest.TestCase):
 
         out = self._invoke_command("stop")
 
-        expect(out.exit_code).to.be(0)
-        expect(self.dummy_callback.call_count).to.equal(1)
+        assert out.exit_code == 0
+        assert self.dummy_callback.call_count == 1
 
         self.pomodoro_service.signal_session_stopped\
             .disconnect(self.dummy_callback)
@@ -118,19 +117,23 @@ class ConsoleTests(unittest.TestCase):
 
     def test_quit_should_return_exit_code_one(self):
         out = self._invoke_command("quit")
-        expect(out.exit_code).to.be(1)
+
+        assert out.exit_code == 1
 
     def test_quit_should_print_exit_message(self):
         out = self._invoke_command("quit")
-        expect(out.output).to.equal("Good bye!\n")
+
+        assert out.output == "Good bye!\n"
 
     def test_eof_should_return_exit_code_one(self):
         out = self._invoke_command("EOF")
-        expect(out.exit_code).to.be(1)
+
+        assert out.exit_code == 1
 
     def test_eof_should_print_exit_message(self):
         out = self._invoke_command("EOF")
-        expect(out.output).to.equal("Good bye!\n")
+
+        assert out.output == "Good bye!\n"
 
     def _invoke_command(self, command, args=None):
         args_list = [command, args] if args is not None else [command]

@@ -12,7 +12,6 @@ from pomito.plugins.task import TaskPlugin
 from pomito.test import PomitoTestFactory
 
 import nose
-import sure
 
 
 class PomodoroServiceTests(unittest.TestCase):
@@ -38,12 +37,12 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service._pomito_instance.exit()
 
     def test_current_task_none_for_default_pomodoro(self):
-        self.pomodoro_service.current_task.should.be.none
+        assert self.pomodoro_service.current_task is None
 
     def test_current_task_is_set_for_running_session(self):
         self.pomodoro_service.start_session(self.dummy_task)
 
-        self.pomodoro_service.current_task.should.equal(self.dummy_task)
+        assert self.pomodoro_service.current_task == self.dummy_task
 
         self.pomodoro_service.stop_session()
 
@@ -51,7 +50,7 @@ class PomodoroServiceTests(unittest.TestCase):
         self.pomodoro_service.start_session(self.dummy_task)
         self.pomodoro_service.stop_session()
 
-        self.pomodoro_service.current_task.should.be.none
+        assert self.pomodoro_service.current_task is None
 
     def test_get_config_gets_value_for_plugin_and_key(self):
         pass
@@ -59,10 +58,9 @@ class PomodoroServiceTests(unittest.TestCase):
     def test_get_config_throws_for_invalid_plugin(self):
         import configparser
 
-        self.pomodoro_service \
-            .get_config.when \
-            .called_with("dummy_plugin", "dummy_key") \
-            .should.throw(configparser.NoSectionError)
+        self.assertRaises(configparser.NoSectionError,
+                          self.pomodoro_service.get_config,
+                          "dummy_plugin", "dummy_key")
 
     def test_get_task_plugins_gets_list_of_all_task_plugins(self):
         from pomito import plugins
@@ -70,7 +68,7 @@ class PomodoroServiceTests(unittest.TestCase):
                            'b': self.pomodoro_service}
         task_plugins = self.pomodoro_service.get_task_plugins()
 
-        sure.expect(task_plugins).equal([plugins.PLUGINS['a']])
+        assert task_plugins == [plugins.PLUGINS['a']]
 
     def test_get_tasks_returns_tasks_for_the_user(self):
         self.pomodoro_service.get_tasks()
@@ -96,24 +94,21 @@ class PomodoroServiceTests(unittest.TestCase):
             .assert_called_once_with(10)
 
     def test_start_session_throws_if_no_task_is_provided(self):
-        self.pomodoro_service \
-            .start_session.when \
-            .called_with(None) \
-            .should.throw(Exception)
+        self.assertRaises(Exception, self.pomodoro_service.start_session, None)
 
     def test_stop_session_waits_for_timer_thread_to_join(self):
         self.pomodoro_service.start_session(self.dummy_task)
-        self.pomodoro_service._timer.is_alive().should.be(True)
+        assert self.pomodoro_service._timer.is_alive()
 
         self.pomodoro_service.stop_session()
-        self.pomodoro_service._timer.is_alive().should.be(False)
+        assert self.pomodoro_service._timer.is_alive() is False
 
     def test_stop_break_waits_for_timer_thread_to_join(self):
         self.pomodoro_service.start_break()
-        self.pomodoro_service._timer.is_alive().should.be(True)
+        assert self.pomodoro_service._timer.is_alive()
 
         self.pomodoro_service.stop_break()
-        self.pomodoro_service._timer.is_alive().should.be(False)
+        assert self.pomodoro_service._timer.is_alive() is False
 
     def test_session_started_is_called_with_correct_session_count(self):
         self.pomodoro_service.signal_session_started \
@@ -232,13 +227,13 @@ class PomodoroServiceTests(unittest.TestCase):
 
         data_dir = self.pomodoro_service.get_data_dir()
 
-        data_dir.should.be.equal(expected_data_dir)
+        assert data_dir == expected_data_dir
 
     def test_get_db_returns_a_valid_database(self):
         test_db = "dummy_db"
         pomodoro_service = pomodoro.Pomodoro(main.Pomito(database=test_db))
 
-        pomodoro_service.get_db().should.be.equal(test_db)
+        assert pomodoro_service.get_db() == test_db
 
     @nose.plugins.attrib.attr("perf")
     def test_session_started_perf(self):
@@ -283,7 +278,7 @@ class TimerTests(unittest.TestCase):
         timer.start()
         time.sleep(0.3)
 
-        self.mock_callback.call_count.should.be.equal(2)
+        assert self.mock_callback.call_count == 2
         self.assertListEqual(self.mock_callback.call_args_list,
                              [((pomodoro.TimerChange.INCREMENT,), {}), ((pomodoro.TimerChange.COMPLETE,), {})],
                              'invalid notify_reason')
@@ -295,7 +290,7 @@ class TimerTests(unittest.TestCase):
         timer.stop()
         time.sleep(0.1)
 
-        self.mock_callback.call_count.should.be.equal(1)
+        assert self.mock_callback.call_count == 1
         self.assertListEqual(self.mock_callback.call_args_list,
                              [((pomodoro.TimerChange.INTERRUPT,), {})],
                              'invalid notify_reason')
@@ -338,7 +333,7 @@ class TimerTests(unittest.TestCase):
         timer.start()
         time.sleep(duration + 2)
 
-        self.reason.should.equal(pomodoro.TimerChange.COMPLETE)
+        assert self.reason == pomodoro.TimerChange.COMPLETE
         self.assertAlmostEqual(self.delta, duration, delta=delta_granular)
 
 

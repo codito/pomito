@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # Pomito - Pomodoro timer on steroids
-# Tests for the Main module
+"""Tests for the Main module."""
 
 import os
 import unittest
 from unittest.mock import Mock, MagicMock
 
 import blinker
-import sure
 import tempfile
 from contextlib import contextmanager
 from peewee import SqliteDatabase
@@ -17,6 +16,7 @@ from pomito import main
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 from pomito.hooks import Hook
+
 
 class MessageTests(unittest.TestCase):
     def test_send_calls_signal_send_with_kwargs(self):
@@ -41,30 +41,30 @@ class MessageDispatcherTests(unittest.TestCase):
             self.dispatcher.join()
 
     def test_queue_message_throws_for_invalid_message(self):
-        self.dispatcher.queue_message.when.called_with(None).should.throw(TypeError)
+        self.assertRaises(TypeError, self.dispatcher.queue_message, None)
 
     def test_queue_message_doesnt_queue_message_if_there_are_no_receivers(self):
         self.dispatcher.queue_message(self.test_message)
 
-        self.dispatcher._message_queue.qsize().should.be.equal(0)
+        assert self.dispatcher._message_queue.qsize() == 0
 
     def test_queue_message_queues_message_if_there_are_receivers(self):
         self.test_message.signal.connect(Mock(), weak=False)
 
         self.dispatcher.queue_message(self.test_message)
 
-        self.dispatcher._message_queue.qsize().should.be.equal(1)
+        assert self.dispatcher._message_queue.qsize() == 1
 
     def test_start_should_start_the_dispatcher_thread(self):
         self.dispatcher.start()
 
-        self.dispatcher.is_alive().should.be.equal(True)
-        self.dispatcher._stop_event.is_set().should.be.equal(False)
+        assert self.dispatcher.is_alive()
+        assert self.dispatcher._stop_event.is_set() is False
 
     def test_start_should_throw_if_dispatcher_is_already_started(self):
         self.dispatcher.start()
 
-        self.dispatcher.start.when.called_with().should.throw(RuntimeError)
+        self.assertRaises(RuntimeError, self.dispatcher.start)
 
     def test_started_dispatcher_should_process_messages_in_queue(self):
         self.test_message.signal.connect(self.mock_callback, weak=False)
@@ -83,11 +83,13 @@ class MessageDispatcherTests(unittest.TestCase):
 
         self.dispatcher.queue_message(self.test_message)
 
-        self.mock_callback.called.should.be.equal(False)
+        assert self.mock_callback.called is False
 
 
 class PomitoTests(unittest.TestCase):
     """
+    Tests for main class.
+
     TODO
     default: durations for session, breaks
     default: config is parsed appropriately
@@ -104,6 +106,7 @@ class PomitoTests(unittest.TestCase):
 
     platform: setup data dir and config home
     """
+
     def setUp(self):
         from pomito.test import PomitoTestFactory
         test_factory = PomitoTestFactory()
@@ -121,20 +124,22 @@ class PomitoTests(unittest.TestCase):
         self._setup_pomito_hooks(self.pomito)
 
     def test_default_settings(self):
-        self.pomito.session_duration.should.be.equal(25 * 60)
-        self.pomito.short_break_duration.should.be.equal(5 * 60)
-        self.pomito.long_break_duration.should.be.equal(15 * 60)
-        self.pomito.long_break_frequency.should.be.equal(4)
+        assert self.pomito.session_duration == 25 * 60
+        assert self.pomito.short_break_duration == 5 * 60
+        assert self.pomito.long_break_duration == 15 * 60
+        assert self.pomito.long_break_frequency == 4
 
     def test_default_plugins(self):
-        self.pomito._plugins['task'].should.be.equal('nulltask')
-        self.pomito._plugins['ui'].should.be.equal('qtapp')
+        assert self.pomito._plugins['task'] == "nulltask"
+        assert self.pomito._plugins['ui'] == "qtapp"
 
     def test_default_hooks(self):
+        from pomito.hooks.activity import ActivityHook
+
         pomito = self.main.Pomito()
 
-        pomito._hooks.should.have.length_of(1)
-        pomito._hooks[0].should.be.a('pomito.hooks.activity.ActivityHook')
+        assert len(pomito._hooks) == 1
+        assert isinstance(pomito._hooks[0], ActivityHook)
         pomito.exit()
 
     def test_initialize_creates_database_if_not_present(self):
@@ -145,7 +150,7 @@ class PomitoTests(unittest.TestCase):
 
             pomito.initialize()
 
-            pomito.get_db().shouldnt.be.equal(None)
+            assert pomito.get_db() is not None
             pomito.exit()
 
     def test_initialize_uses_injected_database(self):
@@ -155,7 +160,7 @@ class PomitoTests(unittest.TestCase):
 
         pomito.initialize()
 
-        pomito.get_db().should.be.equal(dummy_db)
+        assert pomito.get_db() == dummy_db
         pomito.exit()
 
     def test_initialize_setup_plugins_and_hooks(self):
@@ -167,18 +172,18 @@ class PomitoTests(unittest.TestCase):
 
             pomito.initialize()
 
-            pomito.ui_plugin.initialize.call_count.should.be.equal(1)
-            pomito.task_plugin.initialize.call_count.should.be.equal(1)
-            pomito._hooks[0].initialize.call_count.should.be.equal(1)
+            assert pomito.ui_plugin.initialize.call_count == 1
+            assert pomito.task_plugin.initialize.call_count == 1
+            assert pomito._hooks[0].initialize.call_count == 1
             pomito.exit()
 
     def test_get_parser_returns_a_configparser_with_config_data(self):
         pass
 
     def test_get_parser_returns_a_configparser_for_no_config(self):
-        import configparser
+        from configparser import SafeConfigParser
 
-        self.pomito.get_parser().should.be.a(configparser.SafeConfigParser)
+        assert isinstance(self.pomito.get_parser(), SafeConfigParser)
 
     def _setup_pomito_plugins(self, pomito):
         pomito.ui_plugin = Mock(spec=UIPlugin)
