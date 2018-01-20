@@ -1,7 +1,10 @@
 pomito
 ======
 
-[![Build Status](https://travis-ci.org/codito/pomito.svg?branch=master)](https://travis-ci.org/codito/pomito) [![Windows Build status](https://ci.appveyor.com/api/projects/status/3pwticct6bme6v2o?svg=true)](https://ci.appveyor.com/project/codito/pomito) [![Coverage Status](https://coveralls.io/repos/codito/pomito/badge.png?branch=master)](https://coveralls.io/r/codito/pomito?branch=master) [![Code Health](https://landscape.io/github/codito/pomito/master/landscape.png)](https://landscape.io/github/codito/pomito/master)
+[![Build Status](https://img.shields.io/travis/codito/pomito.svg)](https://travis-ci.org/codito/pomito)
+[![Windows Build status](https://img.shields.io/appveyor/ci/codito/pomito.svg)](https://ci.appveyor.com/project/codito/pomito)
+[![Coverage Status](https://img.shields.io/coveralls/github/codito/pomito.svg)](https://coveralls.io/r/codito/pomito?branch=master)
+[![Code Health](https://landscape.io/github/codito/pomito/master/landscape.svg)](https://landscape.io/github/codito/pomito/master)
 
 Simple pomodoro timer with support for tasks and hooks.
 
