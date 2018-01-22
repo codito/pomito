@@ -10,7 +10,7 @@ import logging
 import sys
 
 from pyqtkeybind import keybinder
-from PyQt5 import QtCore, QtDBus, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 from pomito.plugins.ui import UIPlugin
@@ -35,7 +35,6 @@ class QtUI(UIPlugin):
         self._pomodoro_service = pomodoro_service
 
     def initialize(self):
-        import sys
         self._app = PomitoApp(sys.argv)
         self._app.initialize(self._pomodoro_service)
         return
@@ -328,9 +327,6 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         msg = "Stay focused..."
         self._task_bar.update(self.winId(), 0, self._session_duration)
         self._timer_tray.info(header, msg)
-        # FIXME dbus
-        if not sys.platform.startswith("win"):
-            self._notify(header, msg)
 
     def _notify_session_stop(self, reason):
         header = "Pomodoro ended!"
@@ -338,38 +334,6 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._task_bar.pause(self.winId())
 
         self._timer_tray.info(header, msg)
-        # FIXME dbus
-        if not sys.platform.startswith("win"):
-            self._notify(header, msg)
-
-    def _notify(self, header, msg):
-        item = "org.freedesktop.Notifications"
-        path = "/org/freedesktop/Notifications"
-        interface = "org.freedesktop.Notifications"
-        app_name = "pomito"
-        v = QtCore.QVariant(100021)  # random int to identify all notifications
-        if v.convert(QtCore.QVariant.UInt):
-            id_replace = v
-        icon = ""
-        title = header
-        text = msg
-        actions_list = QtDBus.QDBusArgument([], QtCore.QMetaType.QStringList)
-        hint = {}
-        time = 100   # milliseconds for display timeout
-
-        bus = QtDBus.QDBusConnection.sessionBus()
-        if not bus.isConnected():
-            logger.debug("Not connected to dbus!")
-        notify = QtDBus.QDBusInterface(item, path, interface, bus)
-        if notify.isValid():
-            x = notify.call(QtDBus.QDBus.AutoDetect, "Notify", app_name,
-                            id_replace, icon, title, text,
-                            actions_list, hint, time)
-            if x.errorName():
-                logger.debug("Failed to send notification!")
-                logger.debug(x.errorMessage())
-        else:
-            logger.debug("Invalid dbus interface")
 
 
 class WinEventFilter(QAbstractNativeEventFilter):

@@ -120,14 +120,22 @@ class Tray(object):
     def info(self, header, message):
         """Show an informational message on the system tray.
 
+        Uses system tray for notifications in Windows.
+        Prefers DBus notifications in Linux, fallback to system tray if not
+        available.
+
         Args:
             header (str): header for the message
             message (str): message text
         """
-        info_icon = QtWidgets.QSystemTrayIcon.Information
-        self._timer_tray.showMessage(header, message, info_icon)
+        if not self._notify(header, message):
+            info_icon = QtWidgets.QSystemTrayIcon.Information
+            self._timer_tray.showMessage(header, message, info_icon)
 
     def _notify(self, header, msg):
+        if self._is_windows():
+            return False
+
         item = "org.freedesktop.Notifications"
         path = "/org/freedesktop/Notifications"
         interface = "org.freedesktop.Notifications"
@@ -145,6 +153,8 @@ class Tray(object):
         bus = QtDBus.QDBusConnection.sessionBus()
         if not bus.isConnected():
             logger.debug("Not connected to dbus!")
+            return False
+
         notify = QtDBus.QDBusInterface(item, path, interface, bus)
         if notify.isValid():
             x = notify.call(QtDBus.QDBus.AutoDetect, "Notify", app_name,
@@ -153,5 +163,11 @@ class Tray(object):
             if x.errorName():
                 logger.debug("Failed to send notification!")
                 logger.debug(x.errorMessage())
+                return False
         else:
             logger.debug("Invalid dbus interface")
+            return False
+        return True
+
+    def _is_windows(self):
+        return sys.platform.startswith("win")
