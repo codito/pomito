@@ -71,12 +71,6 @@ REQUIRED = [
     "pyrtm",
     "PyQt5",
 ]
-SOURCES = [
-    "http://github.com/codito/asana/tarball/python3#egg=asana-0.0.5",
-    "http://github.com/codito/pyqtkeybind/tarball/master#egg=pyqtkeybind-0.0.1"
-    # asana = { git = "git://github.com/codito/asana.git", editable = true, ref = "python3" }
-    # pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master"}
-]
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -142,7 +136,6 @@ setup(
 
     options=setup_options,
     install_requires=REQUIRED,
-    dependency_links=SOURCES,
     include_package_data=True,
     license="MIT",
     classifiers=[
