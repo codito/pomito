@@ -7,11 +7,7 @@ name = "pypi"
 
 [packages]
 
-blinker = "*"
-peewee = "*"
-"pyqt5" = "*"
-comtypes = "==1.1.3post2"
-click = "*"
+"e1839a8" = {path = ".", editable = true}
 asana = { git = "git://github.com/codito/asana.git", editable = true, ref = "python3" }
 pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master"}
 
