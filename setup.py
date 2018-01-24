@@ -70,6 +70,7 @@ REQUIRED = [
     # "pywin32",
     "peewee",
     "pyrtm",
+    "pyqtkeybind",
     "PyQt5",
 ]
 
