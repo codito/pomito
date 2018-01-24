@@ -62,6 +62,7 @@ VERSION = (0, 2, build_version_minor)
 
 # Dependencies required for execution
 REQUIRED = [
+    "asana",
     "blinker",
     "click>=6.7",
     "comtypes==1.1.3post2",

@@ -8,7 +8,6 @@ name = "pypi"
 [packages]
 
 "e1839a8" = {path = ".", editable = true}
-asana = { git = "git://github.com/codito/asana.git", editable = true, ref = "python3" }
 pyqtkeybind = {git = "git://github.com/codito/pyqtkeybind.git", editable = true, ref = "master"}
 
 

@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 """Tests for asana task plugin."""
 
 import unittest
+import asana
 from unittest.mock import Mock, MagicMock
 
-from asana.asana import AsanaAPI
 from pyfakefs import fake_filesystem
 
 from pomito.plugins.task.asana import AsanaTask
@@ -37,7 +38,7 @@ class AsanaTests(unittest.TestCase):
 
         self.pomodoro_service = self.test_factory.create_fake_service()
 
-        self.asana_api = MagicMock(spec=AsanaAPI)
+        self.asana_api = MagicMock(spec=asana.Client)
         self.asana = AsanaTask(self.pomodoro_service,
                                lambda api_key, debug=False: self.asana_api)
 
@@ -75,9 +76,10 @@ class AsanaTests(unittest.TestCase):
         assert list(self.asana.get_tasks()) is not None
 
     def test_get_tasks_returns_list_of_task_objects(self):
-        self.asana_api.list_workspaces\
-            .return_value = [self.dummy_workspace_list[0]]
-        self.asana_api.list_tasks.return_value = [{'id': 1, 'name': "t"}]
+        # Ensure we pass a single workspace
+        self.dummy_workspace_list.pop()
+        self._setup_dummy_user()
+        self._setup_tasks([{'id': 1, 'name': "t"}])
         self.asana.initialize()
 
         tasks = list(self.asana.get_tasks())
@@ -90,28 +92,30 @@ class AsanaTests(unittest.TestCase):
         assert tasks[0].tags is None
 
     def test_get_tasks_gets_tasks_from_all_workspaces(self):
-        self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
-        self.asana_api.list_tasks.return_value = self.dummy_task_list
+        self._setup_dummy_user()
+        self._setup_tasks(self.dummy_task_list)
         self.asana.initialize()
 
         tasks = list(self.asana.get_tasks())
 
-        self.asana_api.list_workspaces.assert_called_once_with()
         assert len(tasks) == 4
 
     def test_get_tasks_only_gets_tasks_assigned_to_me(self):
-        self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
+        self._setup_dummy_user()
+        self._setup_tasks(self.dummy_task_list)
         self.asana.initialize()
 
         tasks = list(self.asana.get_tasks())
 
+        w1 = {'assignee': "me", 'workspace': 1, 'completed_since': "now"}
+        w2 = {'assignee': "me", 'workspace': 2, 'completed_since': "now"}
         assert tasks is not None
-        assert self.asana_api.list_tasks.call_count == 2
-        self.asana_api.list_tasks.assert_any_call(1, "me")
-        self.asana_api.list_tasks.assert_any_call(2, "me")
+        assert self.asana_api.tasks.find_all.call_count == 2
+        self.asana_api.tasks.find_all.assert_any_call(w1)
+        self.asana_api.tasks.find_all.assert_any_call(w2)
 
     def test_get_tasks_returns_empty_list_for_no_workspace(self):
-        self.asana_api.list_tasks.return_value = self.dummy_task_list
+        self._setup_tasks(self.dummy_task_list)
         self.asana.initialize()
 
         tasks = list(self.asana.get_tasks())
@@ -119,9 +123,18 @@ class AsanaTests(unittest.TestCase):
         assert tasks == []
 
     def test_get_tasks_returns_empty_list_for_no_tasks(self):
-        self.asana_api.list_workspaces.return_value = self.dummy_workspace_list
+        self._setup_dummy_user()
         self.asana.initialize()
 
         tasks = list(self.asana.get_tasks())
 
         assert tasks == []
+
+    def _setup_dummy_user(self):
+        user = {'workspaces': self.dummy_workspace_list}
+        self.asana_api.users = MagicMock(asana.resources.users.Users)
+        self.asana_api.users.me.return_value = user
+
+    def _setup_tasks(self, tasks):
+        self.asana_api.tasks = MagicMock(asana.resources.tasks.Tasks)
+        self.asana_api.tasks.find_all.return_value = tasks
