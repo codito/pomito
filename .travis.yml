@@ -10,8 +10,7 @@ env:
 
 install:
   - pip install pipenv
-  - pipenv check
-  - pipenv install --dev --verbose
+  - pipenv install --dev
 
 script: pipenv run pytest
 

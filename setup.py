@@ -7,59 +7,13 @@ import os
 import sys
 
 from shutil import rmtree
-from setuptools import Command, find_packages
-from pre_build import build_qt, get_pyqt_install_root
-try:
-    from cx_Freeze import setup, Executable
-except ImportError:
-    # Pipenv invokes `setup.py egg_info` while generating locks
-    # Without dependencies it shouldn't fail
-    # Ideal fix is PEP 518 (coming in pip v10.0)
-    from setuptools import setup
-    from collections import namedtuple
-    Executable = namedtuple("Executable", "script base icon")
-
-
-# Build qt related resources
-build_qt()
-
-# Setup cx_freeze packaging
-# pylint: disable=invalid-name
-base = None
-includefiles = []
-if sys.platform == "win32":
-    from os import path
-    pyqt_windows_root = get_pyqt_install_root()
-    includefiles = [
-        (path.join(pyqt_windows_root, "qt\\plugins\\platforms\\qwindows.dll"),
-         "platforms\\qwindows.dll"),
-        ("pomito\\plugins\\ui\\qt\\wintaskbar.tlb", "wintaskbar.tlb"),
-    ]
-    base = "Win32GUI"
-
-includefiles += [
-    ("docs/sample_config.ini", "docs/sample_config.ini"),
-    ("docs/sample_todo.txt", "docs/sample_todo.txt"),
-]
+from setuptools import Command, find_packages, setup
 
 build_version_minor = "0"
 if os.getenv("APPVEYOR_BUILD"):
     build_version_minor = int(os.getenv("APPVEYOR_BUILD_NUMBER")) % 100
 elif os.getenv("TRAVIS_BUILD"):
     build_version_minor = int(os.getenv("TRAVIS_BUILD_NUMBER")) % 100
-
-executables = [Executable("pomito.py",
-                          base=base,
-                          icon="data/qt/pomito_64x64.ico")]
-buildOptions = dict(packages=[], excludes=[],
-                    includes=["atexit", "sip", "idna.idnadata"],
-                    include_files=includefiles,
-                    zip_include_packages=["*"],
-                    zip_exclude_packages=[],
-                    optimize=2
-                    )
-setup_options = dict(build_exe=buildOptions)
-
 
 # Package meta-data.
 NAME = "pomito"
@@ -143,9 +97,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=("tests",)),
     scripts=["pomito.py"],
-    executables=executables,
 
-    options=setup_options,
     install_requires=REQUIRED,
     include_package_data=True,
     license="MIT",
