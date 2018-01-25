@@ -5,7 +5,13 @@ import importlib.util
 
 def get_pyqt_install_root():
     """Get pyqt install path."""
-    return importlib.util.find_spec('PyQt5').submodule_search_locations[0]
+    pyqt = ""
+    try:
+        pyqt = importlib.util.find_spec('PyQt5').submodule_search_locations[0]
+    except Exception:
+        # Don't do anything, likely all dependencies are not available yet
+        pass
+    return pyqt
 
 
 def build_qt():
