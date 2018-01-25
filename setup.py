@@ -8,8 +8,17 @@ import sys
 
 from shutil import rmtree
 from setuptools import Command, find_packages
-from cx_Freeze import setup, Executable
 from pre_build import build_qt, get_pyqt_install_root
+try:
+    from cx_Freeze import setup, Executable
+except ImportError:
+    # Pipenv invokes `setup.py egg_info` while generating locks
+    # Without dependencies it shouldn't fail
+    # Ideal fix is PEP 518 (coming in pip v10.0)
+    from setuptools import setup
+    from collections import namedtuple
+    Executable = namedtuple("Executable", "script base icon")
+
 
 # Build qt related resources
 build_qt()

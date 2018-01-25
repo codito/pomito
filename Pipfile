@@ -7,13 +7,13 @@ name = "pypi"
 
 [packages]
 
-cx-freeze = "*"
 "e1839a8" = {path = ".", editable = true}
 
 
 [dev-packages]
 
 coveralls = "*"
+cx-freeze = "*"
 "flake8" = "*"
 "flake8-docstrings" = "*"
 "flake8-per-file-ignores" = "*"
