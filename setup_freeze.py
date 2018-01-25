@@ -6,7 +6,7 @@ import os
 import sys
 
 import setup
-import cx_freeze
+import cx_Freeze
 from setuptools import find_packages
 from pre_build import build_qt, get_pyqt_install_root
 
@@ -14,7 +14,7 @@ from pre_build import build_qt, get_pyqt_install_root
 # Build qt related resources
 build_qt()
 
-# Setup cx_freeze packaging
+# Setup cx_Freeze packaging
 # pylint: disable=invalid-name
 base = None
 includefiles = []
@@ -33,7 +33,7 @@ includefiles += [
     ("docs/sample_todo.txt", "docs/sample_todo.txt"),
 ]
 
-executables = [cx_freeze.Executable("pomito.py",
+executables = [cx_Freeze.Executable("pomito.py",
                                     base=base,
                                     icon="data/qt/pomito_64x64.ico")]
 buildOptions = dict(packages=[], excludes=[],
@@ -50,7 +50,7 @@ setup_options = dict(build_exe=buildOptions)
 about = {}
 about["__version__"] = '.'.join(map(str, setup.VERSION))
 
-cx_freeze.setup(
+cx_Freeze.setup(
     name=setup.NAME,
     version=about["__version__"],
     description=setup.DESCRIPTION,
