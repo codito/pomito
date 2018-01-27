@@ -35,6 +35,7 @@ REQUIRED = [
     "pyrtm",
     "pyqtkeybind",
     "PyQt5",
+    "py-trello",
 ]
 
 here = os.path.abspath(os.path.dirname(__file__))
