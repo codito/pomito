@@ -3,6 +3,7 @@ site_name: Pomito
 pages:
   - Overview: 'index.md'
   - Configuration: 'config.md'
+  - Tasks: 'tasks.md'
 
 theme:
   name: "material"
