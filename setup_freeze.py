@@ -36,13 +36,12 @@ includefiles += [
 executables = [cx_Freeze.Executable("pomito.py",
                                     base=base,
                                     icon="data/qt/pomito_64x64.ico")]
-buildOptions = dict(packages=[], excludes=[],
+buildOptions = dict(packages=["certifi"],
+                    excludes=["tkinter"],
                     includes=["atexit", "sip", "idna.idnadata"],
                     include_files=includefiles,
                     zip_include_packages=["*"],
-                    zip_exclude_packages=[],
-                    optimize=2
-                    )
+                    zip_exclude_packages=["certifi"],
 setup_options = dict(build_exe=buildOptions)
 
 
