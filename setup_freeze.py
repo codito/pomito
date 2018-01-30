@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """Freeze script for pomito."""
 
-import os
 import sys
 
 import setup
@@ -42,6 +41,7 @@ buildOptions = dict(packages=["certifi"],
                     include_files=includefiles,
                     zip_include_packages=["*"],
                     zip_exclude_packages=["certifi"],
+                    optimize=2)
 setup_options = dict(build_exe=buildOptions)
 
 
