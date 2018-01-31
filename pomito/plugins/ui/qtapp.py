@@ -14,9 +14,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QAbstractNativeEventFilter, QAbstractEventDispatcher
 
 from pomito.plugins.ui import UIPlugin
+from pomito.plugins.ui.qt.task_widget import TaskWindow
 from pomito.plugins.ui.qt.shell import Taskbar, Tray
+from pomito.plugins.ui.qt.utils import get_elided_text
 from pomito.plugins.ui.qt.qt_timer import Ui_MainWindow
-from pomito.plugins.ui.qt.qt_task import Ui_TaskWindow
 from pomito.plugins.ui.qt.qt_interrupt import Ui_InterruptionWindow
 from pomito.pomodoro import TimerChange
 from pomito.task import Task
@@ -73,39 +74,6 @@ class PomitoApp(QtWidgets.QApplication):
         self._timer_window.show()
         self.exec_()
         return
-
-
-class QtUtilities:
-    @classmethod
-    def getElidedText(cls, rect, font, text):
-        """Gets elided text so that the text can fit given rectangle.
-
-        Args:
-        rect: Rectangle which will contain the text. Type: QtCore.QRect
-        font: Font used to render text. Type: QtCore.QFont
-        text: String to render
-        """
-        textLayout = QtGui.QTextLayout(text, font)
-        metrics = QtGui.QFontMetrics(font)
-        textLayout.beginLayout()
-        line = textLayout.createLine()
-        totalWidth = 0
-        totalHeight = 0
-        while line.isValid():
-            line.setLineWidth(rect.width())
-            rectCovered = line.naturalTextRect()
-            totalWidth += rectCovered.width()
-            if totalHeight + rectCovered.width() > rect.height():
-                break
-            else:
-                totalHeight += rectCovered.height()
-
-            line = textLayout.createLine()
-        textLayout.endLayout()
-
-        # XXX are we calculating the width correctly?
-        return metrics.elidedText(text, QtCore.Qt.ElideRight, totalWidth + rect.width())
-    #return metrics.elidedText(text, QtCore.Qt.ElideRight, totalWidth)
 
 
 class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -231,7 +199,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if text is not None:
             label = text
 
-        label = QtUtilities.getElidedText(self.activity_label.rect(), self.activity_label.font(), label)
+        label = get_elided_text(self.activity_label.rect(), self.activity_label.font(), label)
         self.activity_label.setText(label)
         return
 
@@ -344,173 +312,6 @@ class WinEventFilter(QAbstractNativeEventFilter):
     def nativeEventFilter(self, eventType, message):
         ret = self.keybinder.handler(eventType, message)
         return ret, 0
-
-
-class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
-    task_selected = QtCore.Signal(Task)
-    pending_session_start = False
-
-    def __init__(self, service):
-        QtWidgets.QWidget.__init__(self)
-        self._service = service
-
-        # Set up user interface from designer
-        self.setupUi(self)
-        self.initialize()
-
-    def initialize(self):
-        # Hide disabled features
-        self.btn_owa.hide()
-        self.btn_rtm.hide()
-        self.btn_trello.hide()
-        self.btn_text.hide()
-
-        # Set data model
-        self._taskmodel = TaskWindow.TaskModel()
-        item = TaskWindow.TaskItemDelegate()
-
-        self.list_task.setModel(self._taskmodel)
-        self.list_task.setItemDelegate(item)
-
-        self.setWindowFlags(QtCore.Qt.Popup)
-        self.addAction(self.act_hide_window)
-        self.addAction(self.act_focus_txt)
-        self.list_task.addAction(self.act_select_task)
-
-        # Setup signal handlers for UI elements
-        self.txt_filter.textChanged.connect(lambda:
-                                            self._apply_task_filter(self.txt_filter.text()))
-        self.list_task.doubleClicked.connect(self.list_task_selected)
-        self.act_focus_txt.triggered.connect(lambda: self.txt_filter.setFocus())
-        self.act_hide_window.triggered.connect(lambda:
-                                               self.list_task_selected(None))
-        self.act_select_task.triggered.connect(lambda:
-                                               self.list_task_selected(self.list_task.currentIndex()))
-
-        self._apply_task_filter("")
-        return
-
-    def get_task(self):
-        tasks = list(self._service.get_tasks())
-        self._taskmodel.updateTasks(tasks)
-        self._apply_task_filter("")
-        if len(tasks) > 0:
-            self.show()
-        else:
-            logger.debug("Task plugin didn't find any tasks to show.")
-            self.list_task_selected(None)
-        return
-
-    def _apply_task_filter(self, text):
-        #self.list_task.clearContents()
-        #self.list_task.setRowCount(0)
-        #self.list_task.setSortingEnabled(False)
-
-        #for t in self._tasks.values():
-        #if text == u"" or t.description.lower().find(text.lower()) >= 0:
-        #self.list_task.insertRow(0)
-        #self.list_task.setItem(0, 0,
-        #QtWidgets.QTableWidgetItem(unicode(t.estimate)))
-        #self.list_task.setItem(0, 1,
-        #QtWidgets.QTableWidgetItem(unicode(t.actual)))
-        ## Reuse statusTip to store the uid, need to map the uid into
-        ## Task object later!
-        #_item = QtWidgets.QTableWidgetItem(t.description)
-        #_item.setStatusTip(unicode(t.uid))
-        #self.list_task.setItem(0, 2, _item)
-        #self.list_task.setSortingEnabled(True)
-        return
-
-    ###
-    # Widget function overrides
-    ###
-    def closeEvent(self, event):
-        event.accept()
-
-    ###
-    # UI signal handler slots
-    ###
-    def list_task_selected(self, index):
-        self.hide()
-        if index is not None:
-            self.task_selected.emit(self._taskmodel.data(index, QtCore.Qt.DisplayRole))
-        else:
-            from pomito.task import get_null_task
-            self.task_selected.emit(get_null_task())
-
-    ###
-    # Task UI helpers
-    ###
-    class TaskModel(QtCore.QAbstractListModel):
-        def __init__(self):
-            QtCore.QAbstractListModel.__init__(self)
-            return
-
-        def rowCount(self, index):
-            return len(self._tasks)
-
-        def data(self, index, role):
-            if index.isValid() and role == QtCore.Qt.DisplayRole:
-                return self._tasks[index.row()]
-
-        def updateTasks(self, tasks):
-            self._tasks = tasks
-            self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(len(self._tasks), 0))
-            return
-
-    class TaskItemDelegate(QtWidgets.QStyledItemDelegate):
-        def __init__(self):
-            QtWidgets.QStyledItemDelegate.__init__(self)
-            return
-
-        def paint(self, painter, option, index):
-            self.initStyleOption(option, index)
-
-            data = index.data()
-
-            style = option.widget.style()
-            hor_padding = option.rect.width() * 0.02
-            ver_padding = option.rect.height() * 0.02
-            inner_rect = option.rect.adjusted(hor_padding, ver_padding, -hor_padding, -ver_padding)
-            lineHeight = option.fontMetrics.lineSpacing()
-
-            painter.save()
-            if option.state & QtWidgets.QStyle.State_Selected:
-                painter.fillRect(option.rect, option.palette.highlight());
-                style.drawControl(QtWidgets.QStyle.CE_ItemViewItem, option, painter, option.widget)
-
-            # first item: draw task description
-            text_space = inner_rect.adjusted(0, 0, 0, -option.rect.height() * 0.33)
-            elidedText = QtUtilities.getElidedText(text_space,
-                                                   painter.font(),
-                                                   data.description)
-            painter.drawText(text_space,
-                             option.displayAlignment | QtCore.Qt.TextWordWrap,
-                             elidedText)
-
-            # second item: draw priority and other meta information
-            text_space = inner_rect.adjusted(0, text_space.height() + ver_padding, 0, 0)
-            meta_text = QtUtilities.getElidedText(text_space,
-                                                  painter.font(),
-                                                  "Estimate: {0}, Actual: {1}, Tags: {2}".format(data.estimate, data.actual, data.tags))
-            painter.drawText(text_space,
-                             option.displayAlignment | QtCore.Qt.TextWordWrap,
-                             meta_text)
-
-            # last item: draw border
-            dotted_pen = QtGui.QPen(QtCore.Qt.DotLine)
-            painter.setPen(dotted_pen)
-            painter.drawLine(inner_rect.x(),
-                             inner_rect.y() + inner_rect.height(),
-                             inner_rect.x() + inner_rect.width(),
-                             inner_rect.y() + inner_rect.height())
-
-            painter.restore()
-            return
-
-        def sizeHint(self, option, index):
-            size = QtCore.QSize(option.rect.width(), option.fontMetrics.lineSpacing() * 5)
-            return size
 
 
 class InterruptWindow(QtWidgets.QWidget, Ui_InterruptionWindow):
