@@ -5,7 +5,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pomito.plugins.ui.qt.qt_task import Ui_TaskWindow
-from pomito.plugins.ui.qt.utils import get_elided_text
+from pomito.plugins.ui.qt.utils import get_elided_text, Worker, WorkerCompletedEvent
 from pomito.task import Task
 
 logger = logging.getLogger("pomito.plugins.ui.qtapp.task")
@@ -47,7 +47,6 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
         self.list_task.setModel(self._taskmodel)
         self.list_task.setItemDelegate(item)
 
-        self.setWindowFlags(QtCore.Qt.Popup)
         self.addAction(self.act_hide_window)
         self.addAction(self.act_focus_txt)
         self.list_task.addAction(self.act_select_task)
@@ -65,17 +64,30 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
         self._apply_task_filter("")
         return
 
+    def customEvent(self, event):
+        """Override for custom events."""
+        if isinstance(event, WorkerCompletedEvent):
+            event.callback()
+
     def get_task(self):
         """Get tasks for plugin."""
-        tasks = list(self._service.get_tasks())
-        self._taskmodel.updateTasks(tasks)
-        self._apply_task_filter("")
-        if len(tasks) > 0:
-            self.show()
-        else:
-            logger.debug("Task plugin didn't find any tasks to show.")
-            self.list_task_selected(None)
-        return
+        def func():
+            try:
+                return list(self._service.get_tasks())
+            except Exception as e:
+                logger.debug("Error: {0}".format(e))
+                return []
+
+        def on_complete(result):
+            if isinstance(result, list):
+                self._taskmodel.updateTasks(result)
+                self._apply_task_filter("")
+            else:
+                logger.debug("Error in worker thread: {0}".format(result))
+
+        t = Worker(self, on_complete, func)
+        t.start()
+        self.show()
 
     def _apply_task_filter(self, text):
         # self.list_task.clearContents()
