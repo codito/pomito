@@ -288,7 +288,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_timer.setDisabled(False)
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
-        self._task_bar.reset()
+        self._task_bar.reset(self.winId())
 
     def _notify_session_start(self):
         header = "Pomodoro started!"
