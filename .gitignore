@@ -37,6 +37,9 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# Unit test
+.pytest_cache/
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -57,9 +60,6 @@ docs/_build/
 
 # PyBuilder
 target/
-
-# Local peewee.db
-peewee.db
 
 # Ignore pycharm files
 .idea/
