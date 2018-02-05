@@ -101,9 +101,6 @@ class PomitoTests(unittest.TestCase):
     exit: calls close on all hooks
     exit: writes the configuration
 
-    get_parser: returns an instance of configparser
-    get_parser: returns none if there is no config file
-
     platform: setup data dir and config home
     """
 
@@ -122,12 +119,6 @@ class PomitoTests(unittest.TestCase):
         self.pomito = main.Pomito(database=dummy_db)
         self._setup_pomito_plugins(self.pomito)
         self._setup_pomito_hooks(self.pomito)
-
-    def test_default_settings(self):
-        assert self.pomito.session_duration == 25 * 60
-        assert self.pomito.short_break_duration == 5 * 60
-        assert self.pomito.long_break_duration == 15 * 60
-        assert self.pomito.long_break_frequency == 4
 
     def test_default_plugins(self):
         assert self.pomito._plugins['task'] == "nulltask"
@@ -177,14 +168,6 @@ class PomitoTests(unittest.TestCase):
             assert pomito.task_plugin.initialize.call_count == 1
             assert pomito._hooks[0].initialize.call_count == 1
             pomito.exit()
-
-    def test_get_parser_returns_a_configparser_with_config_data(self):
-        pass
-
-    def test_get_parser_returns_a_configparser_for_no_config(self):
-        from configparser import SafeConfigParser
-
-        assert isinstance(self.pomito.get_parser(), SafeConfigParser)
 
     def _setup_pomito_plugins(self, pomito):
         pomito.ui_plugin = Mock(spec=UIPlugin)

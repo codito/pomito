@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Pomito - Pomodoro timer on steroids
-# Implementation of Pomodoro service layer
+"""Implementation of Pomodoro service layer."""
 
 import logging
 import threading
@@ -70,10 +70,12 @@ class Pomodoro(object):
         return Timer(duration, callback, interval)
 
     def __init__(self, pomito_instance, create_timer=_get_timer):
+        """Create an instance of the pomodoro service."""
         self._pomito_instance = pomito_instance
         self._session_count = 0
         self._create_timer = create_timer
-        self._timer = self._create_timer(self._pomito_instance.session_duration,
+        self._config = self._pomito_instance.get_configuration()
+        self._timer = self._create_timer(self._config.session_duration,
                                          self._update_state)
         # other values = "{short, long}_break", "interruption"
         self._timer_type = TimerType.SESSION
@@ -88,48 +90,55 @@ class Pomodoro(object):
         return
 
     def get_config(self, plugin_name, config_key):
-        """Gets the config dict for <plugin_name> from pomito ini file"""
-        return self._pomito_instance.get_parser().get(plugin_name, config_key)
+        """Get the config dict for <plugin_name> from pomito ini file."""
+        c = self._config.get_setting(plugin_name)
+        config_value = None
+        for kv in c:
+            if kv[0] == config_key:
+                config_value = kv[1]
+        return config_value
 
     def get_db(self):
-        """Gets the in application database for Pomito."""
+        """Get the in application database for Pomito."""
         return self._pomito_instance.get_db()
 
     def get_data_dir(self):
-        """Gets the data directory for pomito application."""
+        """Get the data directory for pomito application."""
         from .main import DATA_DIR
         return DATA_DIR
 
     def get_task_plugins(self):
-        """Gets list of all registered task plugins."""
+        """Get list of all registered task plugins."""
         plugins = get_plugins().items()
         return [v for k, v in plugins if isinstance(get_plugin(k), TaskPlugin)]
 
     def get_tasks(self):
-        """Gets all tasks in the current task plugin."""
+        """Get all tasks in the current task plugin."""
         return self._pomito_instance.task_plugin.get_tasks()
 
     def get_tasks_by_filter(self, task_filter):
-        """Gets all tasks with attributes matching a filter.
+        """Get all tasks with attributes matching a filter.
 
         Args:
             task_filter: string to match task attributes
 
-        See TaskPlugin.get_tasks_by_filter."""
+        See TaskPlugin.get_tasks_by_filter.
+        """
         return self._pomito_instance.task_plugin.get_tasks_by_filter(task_filter)
 
     def get_task_by_id(self, task_id):
-        """Gets all tasks with id matching task id.
+        """Get all tasks with id matching task id.
 
         Args:
             task_id: int to match task id
 
-        See TaskPlugin.get_task_by_id."""
+        See TaskPlugin.get_task_by_id.
+        """
         return self._pomito_instance\
             .task_plugin.get_task_by_id(task_id)
 
     def start_session(self, task):
-        """Starts a pomodoro session.
+        """Start a pomodoro session.
 
         Args:
             task: Task - A task object, to be performed during this session
@@ -139,43 +148,50 @@ class Pomodoro(object):
 
         self.current_task = task
         self._timer_type = TimerType.SESSION
-        self._timer = self._create_timer(self._pomito_instance.session_duration,
+        self._timer = self._create_timer(self._config.session_duration,
                                          self._update_state)
         msg = Message(self.signal_session_started,
                       session_count=self._session_count,
-                      session_duration=self._pomito_instance.session_duration,
+                      session_duration=self._config.session_duration,
                       task=self.current_task)
         self._pomito_instance.queue_signal(msg)
         self._timer.start()
 
     def stop_session(self):
-        """Stops a pomodoro session."""
+        """Stop a pomodoro session."""
         self._stop_timer()
         self.current_task = None
 
     def start_break(self):
-        """Starts a break on completion of a session.
+        """Start a break on completion of a session.
 
         A short break of 5 minutes is introduced after each session.
         A longer break of duration 15 minutes is introduced after 4 consecutive
         sessions.
         """
-        if self._session_count == self._pomito_instance.long_break_frequency:
+        if self._session_count == self._config.long_break_frequency:
             self._timer_type = TimerType.LONG_BREAK
-            _duration = self._pomito_instance.long_break_duration
+            _duration = self._config.long_break_duration
         else:
             self._timer_type = TimerType.SHORT_BREAK
-            _duration = self._pomito_instance.short_break_duration
+            _duration = self._config.short_break_duration
         self._timer = self._create_timer(_duration, self._update_state)
         msg = Message(self.signal_break_started, break_type=self._timer_type)
         self._pomito_instance.queue_signal(msg)
         self._timer.start()
 
     def stop_break(self):
-        """Stops a break session."""
+        """Stop a break session."""
         self._stop_timer()
 
     def start_interruption(self, reason, is_external, add_unplanned_task):
+        """Start an interruption.
+
+        Args:
+            reason (str): reason for interruption
+            is_external (bool): True if this is an external interruption
+            add_unplanned_task (bool): Adds an unplanned task if True
+        """
         # TODO option to stop auto monitoring of interruptions
         # TODO add the interruption activity
         # TODO support interruption type for interruption_stop
@@ -190,11 +206,13 @@ class Pomodoro(object):
         self._timer.start()
 
     def stop_interruption(self):
-        """Stops the interruption timer."""
+        """Stop the interruption timer."""
         self._stop_timer()
 
     def _update_state(self, notify_reason):
-        """This is called in context of timer thread. Try to keep execution as
+        """Update state of the timer.
+
+        This is called in context of timer thread. Try to keep execution as
         minimal as possible in case of increment notifications.
 
         This method queues the signals into the dispatcher queue.
@@ -235,8 +253,9 @@ class Pomodoro(object):
 
 
 class Timer(threading.Thread):
+    """A custom timer inspired by threading.Timer.
 
-    """Inspired by threading.Timer. Two major differences:
+    Two major differences:
         - We call the parent_callback every interval (default = one second)
         - We support notify_reason with callbacks. We support "interrupt" as
         reason because of support for other plugins and hooks which listen to
@@ -252,7 +271,8 @@ class Timer(threading.Thread):
     """
 
     def __init__(self, duration, callback, interval=1):
-        """
+        """Create an instance of the timer.
+
         Args:
             duration: total duration for the timer
             callback: callback that will be invoked on stop or completion
@@ -268,12 +288,14 @@ class Timer(threading.Thread):
         self._finished = threading.Event()
 
     def start(self):
+        """Start the timer."""
         if threading.currentThread() == self:
             raise RuntimeError("Cannot call start on the timer thread itself.")
         self._notify_reason = TimerChange.INCREMENT
         threading.Thread.start(self)
 
     def stop(self):
+        """Stop the timer."""
         if threading.currentThread() == self:
             raise RuntimeError("Cannot call stop on the timer thread itself.")
         self._notify_reason = TimerChange.INTERRUPT

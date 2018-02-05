@@ -11,6 +11,7 @@ from queue import Queue
 from peewee import SqliteDatabase
 
 import pomito.plugins
+from pomito.config import Configuration
 
 PACKAGE_NAME = "pomito"
 DATA_HOME = CONFIG_HOME = os.path.expanduser("~")
@@ -117,26 +118,21 @@ class Pomito(object):
             database    peewee.SqliteDatabase database to use for tasks etc.
             create_message_dispatcher function creates a MessageDispatcher
         """
-        from configparser import SafeConfigParser
         from pomito import pomodoro
 
         self._config_file = config_file
         self._database = database
-        self._parser = SafeConfigParser()
         self._message_dispatcher = create_message_dispatcher()
         self._threads = {}
         self._plugins = {}
         self._hooks = []
 
         # Set default options
-        self.session_duration = 25 * 60      # Duration of a pomodoro session
-        self.short_break_duration = 5 * 60   # Duration of a short break between two sessions
-        self.long_break_duration = 15 * 60   # Duration of a longer break after every 4 sessions
-        self.long_break_frequency = 4        # Frequency of long breaks
         self._plugins['ui'] = 'qtapp'
         self._plugins['task'] = 'nulltask'
 
-        self._parse_config_file(self._config_file)
+        self._config = Configuration(config_file)
+        self._config.load()
 
         # Pomodoro service instance. Order of initializations are important
         self.pomodoro_service = pomodoro.Pomodoro(self)
@@ -193,53 +189,24 @@ class Pomito(object):
             self._message_dispatcher.join()
         for hook in self._hooks:
             hook.close()
-        #self._validate_state()
-        #self._parser.write()
+        # self._validate_state()
         if self._database is not None:
             self._database.close()
         return
 
     def get_db(self):
-        """Gets the database object.
+        """Get the database object.
 
         Returns:
             database peewee.SqliteDatabase object
         """
         return self._database
 
-    def get_parser(self):
-        """Gets the parser object.
-
-        Returns:
-            parser ConfigParser
-        """
-        return self._parser
+    def get_configuration(self):
+        return self._config
 
     def queue_signal(self, message):
         self._message_dispatcher.queue_message(message)
-
-    def _parse_config_file(self, config_file):
-        """Parse the pomito user configuration file. Sample config at
-        $Src/docs/sample_config.ini.
-
-        Args:
-            config_file: string Path to the configuration file
-        """
-        if config_file is None or not os.path.isfile(config_file):
-            logger.info("Config file '{0}' not found. Using defaults.".format(config_file))
-            return
-
-        self._parser.read(config_file)
-        if self._parser.has_section('pomito'):
-            self.session_duration = self._parser.getint('pomito', 'session_duration') * 60
-            self.short_break_duration = self._parser.getint('pomito', 'short_break_duration') * 60
-            self.long_break_duration = self._parser.getint('pomito', 'long_break_duration') * 60
-            self.long_break_frequency = self._parser.getint('pomito', 'long_break_frequency') * 60
-
-        if self._parser.has_section('plugins'):
-            self._plugins['ui'] = self._parser.get('plugins', 'ui')
-            self._plugins['task'] = self._parser.get('plugins', 'task')
-        return
 
     def _validate_state(self):
         """Validates configuration, plugins."""

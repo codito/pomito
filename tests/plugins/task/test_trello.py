@@ -84,7 +84,7 @@ def test_trello_can_create_trello_instance(trello):
 def test_initialize_logs_error_for_invalid_config(trello, caplog):
     trello.initialize()
 
-    err_msg = "Error initializing plugin: No option"
+    err_msg = "Error initializing plugin: invalid configuration"
     err_rec = [r for r in caplog.record_tuples if r[1] == logging.ERROR]
     assert 1 == len(err_rec)
     assert err_msg in err_rec[0][2]

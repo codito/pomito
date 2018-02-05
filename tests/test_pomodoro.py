@@ -55,12 +55,10 @@ class PomodoroServiceTests(unittest.TestCase):
     def test_get_config_gets_value_for_plugin_and_key(self):
         pass
 
-    def test_get_config_throws_for_invalid_plugin(self):
-        import configparser
+    def test_get_config_returns_none_invalid_plugin(self):
+        val = self.pomodoro_service.get_config("dummy_plugin", "dummy_key")
 
-        self.assertRaises(configparser.NoSectionError,
-                          self.pomodoro_service.get_config,
-                          "dummy_plugin", "dummy_key")
+        assert val is None
 
     def test_get_task_plugins_gets_list_of_all_task_plugins(self):
         from pomito import plugins

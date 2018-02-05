@@ -34,18 +34,18 @@ class TrelloTask(task.TaskPlugin):
 
     def initialize(self):
         """Initialize the trello task plugin."""
-        try:
-            def _get_config(config):
-                return self._pomodoro_service.get_config("task.trello", config)
+        def _get_config(config):
+            return self._pomodoro_service.get_config("task.trello", config)
 
-            api_key = _get_config("api_key")
-            api_secret = _get_config("api_secret")
-            self.trello_board = _get_config("board")
-            self.trello_list = _get_config("list")
+        api_key = _get_config("api_key")
+        api_secret = _get_config("api_secret")
+        self.trello_board = _get_config("board")
+        self.trello_list = _get_config("list")
 
-            self.trello_api = self._get_trello_client(api_key, api_secret)
-        except Exception as ex:
-            logger.error("Error initializing plugin: {0}".format(ex))
+        self.trello_api = self._get_trello_client(api_key, api_secret)
+        if api_key is None or api_secret is None\
+                or self.trello_board is None or self.trello_list is None:
+            logger.error("Error initializing plugin: invalid configuration")
 
     def get_tasks(self):
         """Get all incomplete tasks assigned to the user."""
