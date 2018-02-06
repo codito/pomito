@@ -8,6 +8,7 @@ from unittest.mock import patch
 from peewee import SqliteDatabase
 
 from pomito import main, pomodoro
+from pomito.config import Configuration
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 
@@ -97,7 +98,8 @@ class PomitoTestFactory(object):
         replace os/path calls. See tests/hooks/test_activity.py for example.
         """
         database = SqliteDatabase(':memory:')
-        pomito = main.Pomito(self.config_file, database,
+        config = Configuration(self.config_file)
+        pomito = main.Pomito(config, database,
                              create_message_dispatcher=lambda:
                              self.message_dispatcher)
         pomito.ui_plugin = Mock(spec=UIPlugin)

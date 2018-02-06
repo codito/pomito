@@ -4,6 +4,7 @@ import logging
 import os
 from configparser import ConfigParser
 
+__all__ = ["Configuration"]
 logger = logging.getLogger("pomito.config")
 
 
@@ -26,9 +27,12 @@ class Configuration(object):
         """Create an instance of pomito configuration."""
         self._config_file = config_file
         self._parser = ConfigParser()
+        self._initialized = False
 
     def get_setting(self, plugin):
         """Get setting for a plugin."""
+        if not self._initialized:
+            raise Exception("Configuration is not initialized. Did you call `load()`.")
         if self._parser.has_section(plugin):
             return self._parser.items(plugin)
         return []
@@ -36,10 +40,12 @@ class Configuration(object):
     def load(self):
         """Parse the pomito user configuration file."""
         config_file = self._config_file
+        self._initialized = True
         if config_file is None or not os.path.isfile(config_file):
             logger.info("Config file '{0}' not found. Using defaults.".format(config_file))
             return
 
+        logger.info("Using configuration file '{0}'.".format(config_file))
         self._parser.read(config_file)
         if self._parser.has_section("pomito"):
             self.session_duration = self._parser.getint("pomito", "session_duration") * 60

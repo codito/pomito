@@ -62,6 +62,8 @@ def test_default_settings_config_file_no_content(fs):
     assert config.short_break_duration == 5 * 60
     assert config.long_break_duration == 15 * 60
     assert config.long_break_frequency == 4
+    assert config.ui_plugin == "qtapp"
+    assert config.task_plugin == "nulltask"
 
 
 def test_load_reads_default_settings_from_config(config):
@@ -71,6 +73,11 @@ def test_load_reads_default_settings_from_config(config):
     assert config.short_break_duration == 2 * 60
     assert config.long_break_duration == 5 * 60
     assert config.long_break_frequency == 2
+
+
+def test_get_setting_throws_if_not_loaded(config):
+    with pytest.raises(Exception):
+        config.get_setting("section1")
 
 
 def test_get_setting_returns_empty_dictionary_if_section_not_exist(config):

@@ -109,29 +109,26 @@ class Pomito(object):
         - Handover execution to UI plugin
     """
 
-    def __init__(self, config_file=None, database=None,
+    def __init__(self, config=None, database=None,
                  create_message_dispatcher=lambda: MessageDispatcher()):
         """Create a Pomito object.
 
         Arguments:
-            config_file string  Path to the configuration file
-            database    peewee.SqliteDatabase database to use for tasks etc.
+            config   Configuration  Path to the configuration file
+            database peewee.SqliteDatabase database to use for tasks etc.
             create_message_dispatcher function creates a MessageDispatcher
         """
         from pomito import pomodoro
 
-        self._config_file = config_file
+        self._config = config
         self._database = database
         self._message_dispatcher = create_message_dispatcher()
         self._threads = {}
-        self._plugins = {}
         self._hooks = []
 
-        # Set default options
-        self._plugins['ui'] = 'qtapp'
-        self._plugins['task'] = 'nulltask'
-
-        self._config = Configuration(config_file)
+        if self._config is None:
+            self._config_file = os.path.join(CONFIG_DIR, "config.ini")
+            self._config = Configuration(self._config_file)
         self._config.load()
 
         # Pomodoro service instance. Order of initializations are important
@@ -139,8 +136,8 @@ class Pomito(object):
 
         # Default plugins
         pomito.plugins.initialize(self.pomodoro_service)
-        self.ui_plugin = pomito.plugins.get_plugin(self._plugins['ui'])
-        self.task_plugin = pomito.plugins.get_plugin(self._plugins['task'])
+        self.ui_plugin = pomito.plugins.get_plugin(self._config.ui_plugin)
+        self.task_plugin = pomito.plugins.get_plugin(self._config.task_plugin)
 
         # Add the plugins to threads list
         self._threads['task_plugin'] = threading.Thread(target=self.task_plugin)
@@ -226,7 +223,7 @@ class Pomito(object):
 
 
 def main():
-    p = Pomito(os.path.join(CONFIG_DIR, "config.ini"))
+    p = Pomito()
     p.run()
 
     return

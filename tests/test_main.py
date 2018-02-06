@@ -13,6 +13,7 @@ from peewee import SqliteDatabase
 from pyfakefs import fake_filesystem
 
 from pomito import main
+from pomito.config import Configuration
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 from pomito.hooks import Hook
@@ -115,14 +116,11 @@ class PomitoTests(unittest.TestCase):
         test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
         dummy_db = SqliteDatabase(':memory:')
+        dummy_config = Configuration("dummy_config.ini")
         self.main = main
-        self.pomito = main.Pomito(database=dummy_db)
+        self.pomito = main.Pomito(config=dummy_config, database=dummy_db)
         self._setup_pomito_plugins(self.pomito)
         self._setup_pomito_hooks(self.pomito)
-
-    def test_default_plugins(self):
-        assert self.pomito._plugins['task'] == "nulltask"
-        assert self.pomito._plugins['ui'] == "qtapp"
 
     def test_default_hooks(self):
         from pomito.hooks.activity import ActivityHook

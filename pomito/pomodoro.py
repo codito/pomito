@@ -91,6 +91,7 @@ class Pomodoro(object):
 
     def get_config(self, plugin_name, config_key):
         """Get the config dict for <plugin_name> from pomito ini file."""
+        logger.debug("Get config {0}.{1}.".format(plugin_name, config_key))
         c = self._config.get_setting(plugin_name)
         config_value = None
         for kv in c:
