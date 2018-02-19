@@ -1,17 +1,17 @@
 sudo: false
 language: python
 cache: pip
-
 python:
-  - "3.6"
-
+- '3.6'
 env:
-  - "POMITO_TEST=1"
-
+  matrix:
+  - POMITO_TEST=1
+  global:
+  - secure: fov1Tkyt5fEzStd52EzkalwvraRsKMjmifiqa1M7xQgTYnk7dOBJP0tpT4rDj1hptkqRUpGXPnN5hTD/NE6refhTvg3Pubn0vlkATtLsdNaBBWByNc5NK0msPMQt53LKynOEoACvG+BIEOPnQcq/DXB3N2q3lFgPVyVveUYghGQ=
+  - secure: OcE9Ct4nRif+7KwQtj9GQ8FeJsBzryaC69O5fituf+1EUjr9dcqfZa4WIOmzDWDyWqeFZ1Ysx9rTRAn1Q16hoghcvSks/nJ7+Ta5NgK9rrMPS7k1LJQ1p40r6LnMnCQEqiuLSzKWHkPDMZZosl8Wk+RKRWHvTHBb+di1Jqk+p+Y=
+  - secure: FaHX2UmIdVVeY2VVzVaazIrEEK4jh/wFREHlKMOf+gbrqcWthxjHznZN+eLRt7uVJX3g0fKKCE67Z6NBxutzw7VhKfpzk6zpuvCjQF3iXsJBUra0XVYFVtdJA35/yn6a4vk+CA9KqSOwLQquYpvIOrDFuZRwz3bUAs+yl86FnL8=
 install:
-  - pip install pipenv
-  - pipenv install --dev
-
+- pip install pipenv
+- pipenv install --dev
 script: pipenv run pytest
-
 after_success: pipenv run coveralls
