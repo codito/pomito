@@ -99,9 +99,7 @@ class PomitoTestFactory(object):
         """
         database = SqliteDatabase(':memory:')
         config = Configuration(self.config_file)
-        pomito = main.Pomito(config, database,
-                             create_message_dispatcher=lambda:
-                             self.message_dispatcher)
+        pomito = main.Pomito(config, database, self.message_dispatcher)
         pomito.ui_plugin = Mock(spec=UIPlugin)
         pomito.task_plugin = MagicMock(spec=TaskPlugin)
         pomito.initialize()

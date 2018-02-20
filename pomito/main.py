@@ -109,23 +109,24 @@ class Pomito(object):
         - Handover execution to UI plugin
     """
 
-    def __init__(self, config=None, database=None,
-                 create_message_dispatcher=lambda: MessageDispatcher()):
+    def __init__(self, config=None, database=None, message_dispatcher=None):
         """Create a Pomito object.
 
         Arguments:
             config   Configuration  Path to the configuration file
             database peewee.SqliteDatabase database to use for tasks etc.
-            create_message_dispatcher function creates a MessageDispatcher
+            message_dispatcher MessageDispatcher message dispatcher instance
         """
         from pomito import pomodoro
 
         self._config = config
         self._database = database
-        self._message_dispatcher = create_message_dispatcher()
+        self._message_dispatcher = message_dispatcher
         self._threads = {}
         self._hooks = []
 
+        if self._message_dispatcher is None:
+            self._message_dispatcher = MessageDispatcher()
         if self._config is None:
             self._config_file = os.path.join(CONFIG_DIR, "config.ini")
             self._config = Configuration(self._config_file)
