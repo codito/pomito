@@ -11,8 +11,8 @@ logger = logging.getLogger("pomito.config")
 class Configuration(object):
     """Configuration settings for pomito.
 
-    Configuration is read from `config.ini` file in pomito data directory. See
-    documentation for more details.
+    Configuration is read from `config.ini` file in pomito data directory.
+    See documentation for more details.
     """
 
     # Set sensible defaults
@@ -23,9 +23,10 @@ class Configuration(object):
     ui_plugin = "qtapp"
     task_plugin = "nulltask"
 
-    def __init__(self, config_file):
+    def __init__(self, config_file, config_data={}):
         """Create an instance of pomito configuration."""
         self._config_file = config_file
+        self._config_data = config_data
         self._parser = ConfigParser()
         self._initialized = False
 
@@ -40,13 +41,24 @@ class Configuration(object):
     def load(self):
         """Parse the pomito user configuration file."""
         config_file = self._config_file
+        config_data = self._config_data
         self._initialized = True
-        if config_file is None or not os.path.isfile(config_file):
+
+        data_loaded = False
+        if config_file is not None and os.path.isfile(config_file):
+            logger.info("Using configuration file '{0}'.".format(config_file))
+            self._parser.read(config_file)
+            data_loaded = True
+
+        if config_data != {}:
+            logger.info("Using config dictionary for configuration.")
+            self._parser.read_dict(config_data)
+            data_loaded = True
+
+        if not data_loaded:
             logger.info("Config file '{0}' not found. Using defaults.".format(config_file))
             return
 
-        logger.info("Using configuration file '{0}'.".format(config_file))
-        self._parser.read(config_file)
         if self._parser.has_section("pomito"):
             self.session_duration = self._parser.getint("pomito", "session_duration") * 60
             self.short_break_duration = self._parser.getint("pomito", "short_break_duration") * 60

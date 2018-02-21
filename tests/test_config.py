@@ -75,6 +75,29 @@ def test_load_reads_default_settings_from_config(config):
     assert config.long_break_frequency == 2
 
 
+def test_load_reads_config_data_if_available():
+    config = Configuration(None, config_data)
+
+    config.load()
+
+    assert config.session_duration == 10 * 60
+    assert config.short_break_duration == 2 * 60
+    assert config.long_break_duration == 5 * 60
+    assert config.long_break_frequency == 2
+
+
+def test_load_prefers_config_data_over_file_settings(config):
+    config._config_data = {"section1": {"k1": "v2"}}
+
+    config.load()
+
+    assert config.session_duration == 10 * 60
+    assert config.short_break_duration == 2 * 60
+    assert config.long_break_duration == 5 * 60
+    assert config.long_break_frequency == 2
+    assert config.get_setting("section1") == [("k1", "v2")]
+
+
 def test_get_setting_throws_if_not_loaded(config):
     with pytest.raises(Exception):
         config.get_setting("section1")
