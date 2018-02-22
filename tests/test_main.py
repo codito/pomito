@@ -13,7 +13,6 @@ from peewee import SqliteDatabase
 from pyfakefs import fake_filesystem
 
 from pomito import main
-from pomito.config import Configuration
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 from pomito.hooks import Hook
@@ -92,17 +91,12 @@ class PomitoTests(unittest.TestCase):
     Tests for main class.
 
     TODO
-    default: durations for session, breaks
-    default: config is parsed appropriately
-
     run: returns for invalid state
     run: runs the ui_plugin
 
     exit: sets the stop event
     exit: calls close on all hooks
     exit: writes the configuration
-
-    platform: setup data dir and config home
     """
 
     def setUp(self):
@@ -116,7 +110,7 @@ class PomitoTests(unittest.TestCase):
         test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
         dummy_db = SqliteDatabase(':memory:')
-        dummy_config = Configuration("dummy_config.ini")
+        dummy_config = test_factory.create_fake_config()
         self.main = main
         self.pomito = main.Pomito(config=dummy_config, database=dummy_db)
         self._setup_pomito_plugins(self.pomito)

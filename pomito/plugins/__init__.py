@@ -31,12 +31,12 @@ def initialize(pomodoro_service):
     from .task import nulltask
 
     global PLUGINS
-    PLUGINS = {'console': console.Console(pomodoro_service),
-               'asana': asana.AsanaTask(pomodoro_service),
-               'rtm': rtm.RTMTask(pomodoro_service),
-               'text': text.TextTask(pomodoro_service),
-               'trello': trello.TrelloTask(pomodoro_service),
-               'nulltask': nulltask.NullTask(pomodoro_service)}
+    PLUGINS.update({'console': console.Console(pomodoro_service),
+                    'asana': asana.AsanaTask(pomodoro_service),
+                    'rtm': rtm.RTMTask(pomodoro_service),
+                    'text': text.TextTask(pomodoro_service),
+                    'trello': trello.TrelloTask(pomodoro_service),
+                    'nulltask': nulltask.NullTask(pomodoro_service)})
 
     if os.environ.get("POMITO_TEST") is None:
         from .ui import qtapp

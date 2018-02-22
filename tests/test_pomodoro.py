@@ -116,7 +116,7 @@ class PomodoroServiceTests(unittest.TestCase):
 
         self.dummy_callback.assert_called_once_with(None,
                                                     session_count=0,
-                                                    session_duration=1500,
+                                                    session_duration=600,
                                                     task=self.dummy_task)
 
         self.pomodoro_service.signal_session_started \

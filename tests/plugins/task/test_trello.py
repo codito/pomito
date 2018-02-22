@@ -6,7 +6,6 @@ import os
 import pytest
 
 from trello import TrelloClient
-from pyfakefs import fake_filesystem
 from unittest.mock import MagicMock
 
 from pomito.pomodoro import Pomodoro
@@ -18,7 +17,6 @@ from pomito.test import PomitoTestFactory
 def test_factory():
     """Create a pomodoro test factory."""
     test_factory = PomitoTestFactory()
-    test_factory.config_file = "/tmp/fake_config.ini"
     return test_factory
 
 
@@ -37,16 +35,8 @@ def trello_api(request):
 @pytest.fixture
 def trello(request, test_factory, trello_api, fs, mocker):
     """Create a trello task object with fakes setup."""
-    # Create a fake config file
-    os_module = fake_filesystem.FakeOsModule(fs)
-    fileopen = fake_filesystem.FakeFileOpen(fs)
     skip_key = getattr(request, 'param', None)
-    _create_fake_config(fs, test_factory.config_file, skip_key)
-
-    # Patch filesystem calls with fake implementations
-    mocker.patch("os.path", os_module.path)
-    mocker.patch("os.makedirs", os_module.makedirs)
-    mocker.patch("builtins.open", fileopen)
+    test_factory.config_data["task_trello"] = _create_fake_config(fs, skip_key)
 
     # Setup fake boards and lists
     pomodoro_service = test_factory.create_fake_service()
@@ -55,18 +45,13 @@ def trello(request, test_factory, trello_api, fs, mocker):
     pomodoro_service._pomito_instance.exit()
 
 
-def _create_fake_config(fs, config_file, skip_key=None):
-    text = "[task.trello]\n"
+def _create_fake_config(fs, skip_key=None):
     configs = {"api_key": "a", "api_secret": "a",
                "board": "PomitoTest", "list": "TestList"}
     if skip_key is not None:
         del configs[skip_key]
 
-    fs.CreateFile(config_file)
-    with open("/tmp/fake_config.ini", "w") as f:
-        f.write(text)
-        for c, v in configs.items():
-            f.write("{0}={1}\n".format(c, v))
+    return configs
 
 
 def test_trello_throws_for_invalid_pomodoro_service(trello):

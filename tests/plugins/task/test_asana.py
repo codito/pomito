@@ -5,8 +5,6 @@ import unittest
 import asana
 from unittest.mock import Mock, MagicMock
 
-from pyfakefs import fake_filesystem
-
 from pomito.plugins.task.asana import AsanaTask
 from pomito.test import PomitoTestFactory
 
@@ -18,24 +16,9 @@ class AsanaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.test_factory = PomitoTestFactory()
-        cls.test_factory.config_file = "/tmp/fake_config.ini"
-
-        # Create a fake config file
-        filesystem = fake_filesystem.FakeFilesystem()
-        cls.os_module = fake_filesystem.FakeOsModule(filesystem)
-        cls.fileopen = fake_filesystem.FakeFileOpen(filesystem)
-
-        fake_config_file = filesystem.CreateFile(cls.test_factory.config_file)
-        fake_config_file.SetContents("""[task.asana]
-                                     api_key = dummy_key
-                                     """)
+        cls.test_factory.config_data["task.asana"] = {"api_key": "dummy_key"}
 
     def setUp(self):
-        # Patch filesystem calls with fake implementations
-        self.test_factory.create_patch(self, 'os.path', self.os_module.path)
-        self.test_factory.create_patch(self, 'os.makedirs', self.os_module.makedirs)
-        self.test_factory.create_patch(self, 'builtins.open', self.fileopen)
-
         self.pomodoro_service = self.test_factory.create_fake_service()
 
         self.asana_api = MagicMock(spec=asana.Client)

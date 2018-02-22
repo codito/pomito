@@ -88,6 +88,11 @@ class FakeTaskPlugin(TaskPlugin):
 class PomitoTestFactory(object):
     """Creates fake pomodoro framework instances for testing."""
 
+    config_data = {"pomito": {"session_duration": 10,
+                              "short_break_duration": 2,
+                              "long_break_duration": 5,
+                              "long_break_frequency": 4},
+                   "plugins": {"ui": "dummyUI", "task": "dummyTask"}}
     config_file = None
     message_dispatcher = FakeMessageDispatcher()
 
@@ -98,10 +103,8 @@ class PomitoTestFactory(object):
         replace os/path calls. See tests/hooks/test_activity.py for example.
         """
         database = SqliteDatabase(':memory:')
-        config = Configuration(self.config_file)
+        config = self.create_fake_config()
         pomito = main.Pomito(config, database, self.message_dispatcher)
-        pomito.ui_plugin = Mock(spec=UIPlugin)
-        pomito.task_plugin = MagicMock(spec=TaskPlugin)
         pomito.initialize()
 
         def create_fake_timer(duration, callback, interval=0.1):
@@ -109,6 +112,15 @@ class PomitoTestFactory(object):
             return FakeTimer(duration, callback, interval)
 
         return pomodoro.Pomodoro(pomito, create_timer=create_fake_timer)
+
+    def create_fake_config(self):
+        """Create a fake configuration instance."""
+        from pomito.plugins import PLUGINS
+
+        PLUGINS['dummyUI'] = Mock(spec=UIPlugin)
+        PLUGINS['dummyTask'] = MagicMock(spec=TaskPlugin)
+
+        return Configuration(self.config_file, self.config_data)
 
     @staticmethod
     def create_patch(testcase, target, new):

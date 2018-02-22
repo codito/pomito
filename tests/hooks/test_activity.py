@@ -6,18 +6,10 @@ import unittest
 from pomito.hooks.activity import ActivityHook, ActivityModel
 from pomito.test import PomitoTestFactory
 
-from pyfakefs import fake_filesystem
-
 
 class ActivityHookTests(unittest.TestCase):
     def setUp(self):
         test_factory = PomitoTestFactory()
-
-        # Encapsulate platform concerns
-        filesystem = fake_filesystem.FakeFilesystem()
-        os_module = fake_filesystem.FakeOsModule(filesystem)
-        test_factory.create_patch(self, 'os.path', os_module.path)
-        test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
         self.pomodoro_service = test_factory.create_fake_service()
         self.activityhook = ActivityHook(self.pomodoro_service)
