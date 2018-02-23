@@ -16,6 +16,7 @@ from pomito import main
 from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 from pomito.hooks import Hook
+from pomito.test import FakeTaskPlugin, FakeUIPlugin, PomitoTestFactory
 
 
 class MessageTests(unittest.TestCase):
@@ -100,7 +101,6 @@ class PomitoTests(unittest.TestCase):
     """
 
     def setUp(self):
-        from pomito.test import PomitoTestFactory
         test_factory = PomitoTestFactory()
 
         # Encapsulate platform concerns
@@ -109,10 +109,10 @@ class PomitoTests(unittest.TestCase):
         test_factory.create_patch(self, 'os.path', os_module.path)
         test_factory.create_patch(self, 'os.makedirs', os_module.makedirs)
 
-        dummy_db = SqliteDatabase(':memory:')
+        self.dummy_db = SqliteDatabase(':memory:')
         dummy_config = test_factory.create_fake_config()
         self.main = main
-        self.pomito = main.Pomito(config=dummy_config, database=dummy_db)
+        self.pomito = main.Pomito(config=dummy_config, database=self.dummy_db)
         self._setup_pomito_plugins(self.pomito)
         self._setup_pomito_hooks(self.pomito)
 
@@ -160,6 +160,24 @@ class PomitoTests(unittest.TestCase):
             assert pomito.task_plugin.initialize.call_count == 1
             assert pomito._hooks[0].initialize.call_count == 1
             pomito.exit()
+
+    def test_run_no_op_for_invalid_state(self):
+        self.pomito.run()
+
+        self.pomito.ui_plugin.run.assert_not_called()
+
+    def test_run_invokes_ui_plugin(self):
+        self.pomito.ui_plugin = FakeUIPlugin()
+        self.pomito.task_plugin = FakeTaskPlugin()
+
+        self.pomito.run()
+
+        assert self.pomito.ui_plugin.started
+
+    def test_exit_closes_database(self):
+        self.pomito.exit()
+
+        assert self.dummy_db.is_closed
 
     def _setup_pomito_plugins(self, pomito):
         pomito.ui_plugin = Mock(spec=UIPlugin)

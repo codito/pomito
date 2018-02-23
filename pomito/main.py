@@ -176,26 +176,23 @@ class Pomito(object):
         self._message_dispatcher.start()
         self.ui_plugin.run()
         self.exit()
-        return
 
     def exit(self):
         """Clean up and save any configuration data. Prepare for exiting the application."""
-        # FIXME Write out current configuration!
         if self._message_dispatcher.is_alive():
             self._message_dispatcher.stop()
             self._message_dispatcher.join()
         for hook in self._hooks:
             hook.close()
-        # self._validate_state()
         if self._database is not None:
             self._database.close()
-        return
 
     def get_db(self):
         """Get the database object.
 
         Returns:
             database peewee.SqliteDatabase object
+
         """
         return self._database
 
@@ -225,5 +222,3 @@ class Pomito(object):
 def main():
     p = Pomito()
     p.run()
-
-    return

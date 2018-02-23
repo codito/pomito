@@ -13,7 +13,7 @@ from pomito.plugins.ui import UIPlugin
 from pomito.plugins.task import TaskPlugin
 
 
-class FakeTimer(object):
+class FakeTimer:
     """A synchronous fake timer."""
 
     def __init__(self, duration, callback, interval=1):
@@ -47,7 +47,7 @@ class FakeTimer(object):
         self._parent_callback(notify_reason)
 
 
-class FakeMessageDispatcher(object):
+class FakeMessageDispatcher:
     """A synchronous fake message dispatcher."""
 
     def start(self):
@@ -85,7 +85,21 @@ class FakeTaskPlugin(TaskPlugin):
         return self.task_list
 
 
-class PomitoTestFactory(object):
+class FakeUIPlugin(UIPlugin):
+    """A fake ui plugin implementation."""
+
+    started = False
+
+    def initialize(self):
+        """Initialize the fake UI."""
+        pass
+
+    def run(self):
+        """Start the UI."""
+        self.started = True
+
+
+class PomitoTestFactory:
     """Creates fake pomodoro framework instances for testing."""
 
     config_data = {"pomito": {"session_duration": 10,
