@@ -10,17 +10,20 @@ from pomito.test import PomitoTestFactory
 
 @pytest.fixture(scope="function")
 def task_window(qtbot):
+    pass
     factory = PomitoTestFactory()
-    api_key = os.getenv("TRELLO_API_KEY")
-    api_secret = os.getenv("TRELLO_API_SECRET")
-    if api_key is not None and api_secret is not None:
-        factory.config_data["task.trello"] = {
-            "api_key": api_key,
-            "api_secret": api_secret,
-            "board": "",
-            "list": ""
-        }
-        factory.config_data["plugins"]["task"] = "trello"
+    use_trello = False
+    if use_trello:
+        api_key = os.getenv("TRELLO_API_KEY")
+        api_secret = os.getenv("TRELLO_API_SECRET")
+        if api_key is not None and api_secret is not None:
+            factory.config_data["task.trello"] = {
+                "api_key": api_key,
+                "api_secret": api_secret,
+                "board": "",
+                "list": ""
+            }
+            factory.config_data["plugins"]["task"] = "trello"
 
     pomodoro_service = factory.create_fake_service()
     task_window = TaskWindow(pomodoro_service)
