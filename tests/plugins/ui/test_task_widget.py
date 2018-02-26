@@ -2,15 +2,14 @@
 """Tests for task widget."""
 
 import os
-import pytest
+# import pytest
 
 from pomito.plugins.ui.qt.task_widget import TaskWindow
 from pomito.test import PomitoTestFactory
 
 
-@pytest.fixture(scope="function")
+# @pytest.fixture(scope="function")
 def task_window(qtbot):
-    pass
     factory = PomitoTestFactory()
     use_trello = False
     if use_trello:
@@ -31,12 +30,12 @@ def task_window(qtbot):
     return task_window
 
 
-@pytest.mark.integration
-def test_task_widget_lists_tasks(qtbot, task_window):
+# @pytest.mark.integration
+# def test_task_widget_lists_tasks(qtbot, task_window):
     # task_window.initialize()
 
     # with qtbot.waitSignal(task_window.task_selected):
     #    task_window.get_task()
 
     # assert task_window.list_task is not None
-    pass
+    # pass
