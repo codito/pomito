@@ -21,6 +21,6 @@ before_script:
 # Headless testing in travis ci: https://docs.travis-ci.com/user/gui-and-headless-browsers/
 - "export DISPLAY=:99.0"
 
-script: xvfb-run pipenv run pytest
+script: xvfb-run pipenv run pytest -v
 
 after_success: pipenv run coveralls
