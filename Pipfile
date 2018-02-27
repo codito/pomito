@@ -24,7 +24,6 @@ pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-qt = "*"
-pytest-xvfb = "*"
 
 
 [requires]
