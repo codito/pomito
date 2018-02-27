@@ -23,7 +23,7 @@ addons:
 
 install:
 - pip install pipenv
-- pipenv install --dev
+- pipenv install --dev --skip-lock
 
 before_install:
 - "export DISPLAY=:99.0"
@@ -31,6 +31,6 @@ before_install:
 - "herbstluftwm &"
 - sleep 2
 
-script: pipenv run pytest -v
+script: pytest -v
 
-after_success: pipenv run coveralls
+after_success: coveralls
