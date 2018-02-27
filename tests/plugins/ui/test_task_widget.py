@@ -32,7 +32,7 @@ def task_window(qtbot):
 
 
 @pytest.mark.integration
-def test_task_widget_lists_tasks(qtbot, task_window):
+def test_task_widget_lists_tasks(qtbot):
     # task_window.initialize()
 
     # with qtbot.waitSignal(task_window.task_selected):
