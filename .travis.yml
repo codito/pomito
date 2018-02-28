@@ -23,7 +23,7 @@ addons:
 
 install:
 - pip install pipenv
-- pipenv install --dev --skip-lock
+- pipenv install --dev --skip-lock --verbose
 
 before_install:
 - "export DISPLAY=:99.0"
