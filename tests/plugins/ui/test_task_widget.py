@@ -4,7 +4,7 @@
 import os
 import pytest
 
-# from pomito.plugins.ui.qt.task_widget import TaskWindow
+from pomito.plugins.ui.qt.task_widget import TaskWindow
 from pomito.test import PomitoTestFactory
 
 
@@ -24,15 +24,14 @@ def task_window(qtbot):
             }
             factory.config_data["plugins"]["task"] = "trello"
 
-    # pomodoro_service = factory.create_fake_service()
-    # task_window = TaskWindow(pomodoro_service)
-    # qtbot.addWidget(task_window)
-    # return task_window
-    return None
+    pomodoro_service = factory.create_fake_service()
+    task_window = TaskWindow(pomodoro_service)
+    qtbot.addWidget(task_window)
+    return task_window
 
 
 @pytest.mark.integration
-def test_task_widget_lists_tasks(qtbot):
+def test_task_widget_lists_tasks(qtbot, task_window):
     # task_window.initialize()
 
     # with qtbot.waitSignal(task_window.task_selected):
