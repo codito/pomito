@@ -93,7 +93,6 @@ class PomitoTests(unittest.TestCase):
 
     TODO
     run: returns for invalid state
-    run: runs the ui_plugin
 
     exit: sets the stop event
     exit: calls close on all hooks
@@ -124,6 +123,16 @@ class PomitoTests(unittest.TestCase):
         assert len(pomito._hooks) == 1
         assert isinstance(pomito._hooks[0], ActivityHook)
         pomito.exit()
+
+    def test_default_plugins(self):
+        from pomito.plugins import PLUGINS
+        default_plugins = ["console", "asana", "rtm", "text", "trello",
+                           "nulltask", "qtapp"]
+
+        assert all([x in set(PLUGINS.keys()) for x in default_plugins])
+
+    def test_custom_plugins(self):
+        pass
 
     def test_initialize_creates_database_if_not_present(self):
         with self._setup_data_dir():

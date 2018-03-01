@@ -13,7 +13,7 @@ __all__ = ['initialize', 'get_plugin']
 PLUGINS = {}
 
 
-def initialize(pomodoro_service):
+def initialize(pomodoro_service, custom_plugins=[]):
     """Discover plugins.
 
     Every plugin has access to the pomodoro_service layer only.
