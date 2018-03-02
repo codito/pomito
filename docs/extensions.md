@@ -42,9 +42,11 @@ def register(pomodoro_service):
     ui_plugin = MyUIPlugin(pomodoro_service)
     task_plugin = MyTaskPlugin(pomodoro_service)
 
-    pomodoro_service.register("name", ui_plugin)
-    pomodoro_service.register("name", task_plugin)
+    pomodoro_service.register("uiplugin", ui_plugin)
+    pomodoro_service.register("taskplugin", task_plugin)
 ```
+
+`name` of the plugin must be unique.
 
 ## Writing a Plugin
 
