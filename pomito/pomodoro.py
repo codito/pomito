@@ -201,9 +201,10 @@ class Pomodoro(object):
             logger.debug('Another timer is alive. Wait for join()')
             self._timer.join()
         self._timer = self._create_timer(0, self._update_state)
-        self._pomito_instance.queue_signal(
-            Message(self.signal_interruption_started,
-                    reason=reason, external=is_external))
+        msg = Message(self.signal_interruption_started,
+                      reason=reason,
+                      external=is_external)
+        self._pomito_instance.queue_signal(msg)
         self._timer.start()
 
     def stop_interruption(self):
@@ -224,10 +225,10 @@ class Pomodoro(object):
         elif notify_reason == TimerChange.COMPLETE:
             if self._timer_type == TimerType.SESSION:
                 self._session_count += 1
-                msg = Message(
-                    self.signal_session_stopped,
-                    session_count=self._session_count, task=self.current_task,
-                    reason=notify_reason)
+                msg = Message(self.signal_session_stopped,
+                              session_count=self._session_count,
+                              task=self.current_task,
+                              reason=notify_reason)
             elif self._timer_type == TimerType.SHORT_BREAK or self._timer_type == TimerType.LONG_BREAK:
                 msg = Message(self.signal_break_stopped,
                               break_type=self._timer_type,
@@ -235,14 +236,14 @@ class Pomodoro(object):
         elif notify_reason == TimerChange.INTERRUPT:
             if self._timer_type == TimerType.SESSION:
                 # TODO cancel session w/ task. Start interruption timer?
-                msg = Message(
-                    self.signal_session_stopped,
-                    session_count=self._session_count, task=self.current_task,
-                    reason=notify_reason)
+                msg = Message(self.signal_session_stopped,
+                              session_count=self._session_count,
+                              task=self.current_task,
+                              reason=notify_reason)
             elif self._timer_type == TimerType.SHORT_BREAK or self._timer_type == TimerType.LONG_BREAK:
-                msg = Message(
-                    self.signal_break_stopped, break_type=self._timer_type,
-                    reason=notify_reason)
+                msg = Message(self.signal_break_stopped,
+                              break_type=self._timer_type,
+                              reason=notify_reason)
             else:
                 msg = Message(self.signal_interruption_stopped,
                               duration=self._timer.time_elapsed)
