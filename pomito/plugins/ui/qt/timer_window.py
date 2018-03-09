@@ -233,7 +233,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._notify_session_stop(reason)
 
     def on_interrupt_start(self, *args, **kwargs):
-        return
+        pass
 
     def on_interrupt_stop(self, *args, **kwargs):
         self._interrupt_duration += kwargs['duration']
