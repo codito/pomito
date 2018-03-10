@@ -31,6 +31,3 @@ def build_qt():
     for f in rcc_files:
         subprocess.check_call([rcc, f[0], "-o", f[1]])
     return
-
-
-build_qt()
