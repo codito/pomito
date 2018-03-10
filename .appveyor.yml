@@ -15,11 +15,7 @@ init:
   - "SET PATH=\\Python36;\\Python36\\Scripts;%PATH%"
 
 install:
-  - ps: cinst 7zip.commandline
   - ps: ls -name "C:\\Python36\\Lib\\site-packages"
-  #- ps: ls -name "C:\\Python36\\Lib\\site-packages\\PyQt5"
-  #- ps: Set-Content -Path "C:\\Python36\\Lib\\site-packages\\PyQt5\\pyuic5.bat" -Value "C:\\Python36\\python.exe -m PyQt5.uic.pyuic %1 %2 %3 %4 %5 %6 %7 %8 %9"
-  #- ps: Get-Content "C:\\Python36\\Lib\\site-packages\\PyQt5\\pyuic5.bat" 
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
@@ -30,7 +26,7 @@ install:
   - "python -m venv .venv"
   - ps: .venv\Scripts\activate.ps1
   - "pipenv install --dev"
-  - "pipenv run python setup_freeze.py build"
+  - "python setup_freeze.py build"
   - cd build/exe.win32-3.6
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
