@@ -67,6 +67,8 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._service.signal_timer_increment.connect(self.on_timer_increment)
         self._service.signal_session_started.connect(self.on_session_start)
         self._service.signal_session_stopped.connect(self.on_session_stop)
+        self._service.signal_break_started.connect(self.on_break_start)
+        self._service.signal_break_stopped.connect(self.on_break_stop)
         self._service.signal_interruption_started.connect(self.on_interrupt_start)
         self._service.signal_interruption_stopped.connect(self.on_interrupt_stop)
 
@@ -231,6 +233,15 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
         self._notify_session_stop(reason)
+        self._service.start_break()
+
+    def on_break_start(self, *args, **kwargs):
+        self.update_activity_label("break")
+        self.btn_timer.setChecked(True)
+
+    def on_break_stop(self, *args, **kwargs):
+        self.update_activity_label(None)
+        self.btn_timer.setChecked(False)
 
     def on_interrupt_start(self, *args, **kwargs):
         pass
