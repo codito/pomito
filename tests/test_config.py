@@ -86,6 +86,21 @@ def test_load_reads_config_data_if_available():
     assert config.long_break_frequency == 2
 
 
+def test_load_reads_fractional_config_duration():
+    fraction_data = {"pomito": {"session_duration": 0.12,
+                                "short_break_duration": 0.21,
+                                "long_break_duration": 0.53,
+                                "long_break_frequency": 2}}
+    config = Configuration(None, fraction_data)
+
+    config.load()
+
+    assert config.session_duration == 7
+    assert config.short_break_duration == 12
+    assert config.long_break_duration == 31
+    assert config.long_break_frequency == 2
+
+
 def test_load_prefers_config_data_over_file_settings(config):
     config._config_data = {"section1": {"k1": "v2"}}
 

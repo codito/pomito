@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Configuration for pomito."""
 import logging
+import math
 import os
 from configparser import ConfigParser
 
@@ -60,11 +61,14 @@ class Configuration(object):
             return
 
         if self._parser.has_section("pomito"):
-            self.session_duration = self._parser.getint("pomito", "session_duration") * 60
-            self.short_break_duration = self._parser.getint("pomito", "short_break_duration") * 60
-            self.long_break_duration = self._parser.getint("pomito", "long_break_duration") * 60
+            self.session_duration = self._get_seconds("pomito", "session_duration")
+            self.short_break_duration = self._get_seconds("pomito", "short_break_duration")
+            self.long_break_duration = self._get_seconds("pomito", "long_break_duration")
             self.long_break_frequency = self._parser.getint("pomito", "long_break_frequency")
 
         if self._parser.has_section("plugins"):
             self.ui_plugin = self._parser.get("plugins", "ui")
             self.task_plugin = self._parser.get("plugins", "task")
+
+    def _get_seconds(self, section, setting):
+        return math.floor(self._parser.getfloat(section, setting) * 60)
