@@ -26,7 +26,9 @@ class Configuration(object):
 
     def __init__(self, config_file, config_data={}):
         """Create an instance of pomito configuration."""
-        self._config_file = config_file
+        self._config_file = os.environ.get("POMITO_CONFIG")
+        if not self._config_file:
+            self._config_file = config_file
         self._config_data = config_data
         self._parser = ConfigParser()
         self._initialized = False

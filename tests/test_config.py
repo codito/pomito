@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for pomito configuration."""
 
+import os
 import pytest
 from pyfakefs import fake_filesystem
 
@@ -111,6 +112,19 @@ def test_load_prefers_config_data_over_file_settings(config):
     assert config.long_break_duration == 5 * 60
     assert config.long_break_frequency == 2
     assert config.get_setting("section1") == [("k1", "v2")]
+
+
+def test_load_prefers_env_config_file_over_specified(config, fs):
+    os.environ["POMITO_CONFIG"] = "config2.ini"
+    try:
+        _create_config("config2.ini", config_data)
+        c = Configuration("/tmp/non_existent.ini")
+
+        c.load()
+
+        assert c.session_duration == 10 * 60
+    finally:
+        del os.environ["POMITO_CONFIG"]
 
 
 def test_get_setting_throws_if_not_loaded(config):
