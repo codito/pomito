@@ -115,14 +115,14 @@ def test_load_prefers_config_data_over_file_settings(config):
 
 
 def test_load_prefers_env_config_file_over_specified(config, fs):
-    os.environ["POMITO_CONFIG"] = "config2.ini"
+    os.environ["POMITO_CONFIG"] = config_file
     try:
-        _create_config("config2.ini", config_data)
         c = Configuration("/tmp/non_existent.ini")
 
         c.load()
 
         assert c.session_duration == 10 * 60
+        assert c.get_setting("section1") == [("k1", "v1")]
     finally:
         del os.environ["POMITO_CONFIG"]
 
