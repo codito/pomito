@@ -99,6 +99,14 @@ class FakeUIPlugin(UIPlugin):
         self.started = True
 
 
+class FakeKeyBinder:
+    """A fake keybinder implementation."""
+
+    def register_hotkey(self, wid, key, callback):
+        """Register a hotkey."""
+        pass
+
+
 class PomitoTestFactory:
     """Creates fake pomodoro framework instances for testing."""
 

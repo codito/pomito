@@ -80,6 +80,7 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
 
         def on_complete(result):
             if isinstance(result, list):
+                logger.debug("Got {0} tasks".format(len(result)))
                 self._taskmodel.updateTasks(result)
                 self._apply_task_filter("")
             else:

@@ -1,17 +1,21 @@
-# Pomito - Pomodoro timer on steroids
-# A text file based task plugin implementation
+# -*- coding: utf-8 -*-
+"""A text file based task plugin implementation."""
 
-import pomito.task
+import logging
+
 from pomito.plugins import task
+from pomito.task import Task
 from io import open
 
+
+__all__ = ['TextTask']
+logger = logging.getLogger('pomito.plugins.task.text')
 
 
 class TextTask(task.TaskPlugin):
     """Implements a plugin to read/write Tasks from a text file.
     See doc/sample_tasks.txt for details of task file.
     """
-    _file = None
 
     def __init__(self, pomodoro_service):
         self._pomodoro_service = pomodoro_service
@@ -21,26 +25,23 @@ class TextTask(task.TaskPlugin):
         # Read plugin configuration
         try:
             file_path = self._pomodoro_service.get_config("task.text", "file")
-            self._file = open(file_path, 'r')
-            for t in self._file.readlines():
-                if not t.startswith("--"):
-                    task_tuple = self.parse_task(t)
-                    self.tasks.append(pomito.task.Task(*task_tuple))
+            with open(file_path, 'r') as f:
+                for t in f.readlines():
+                    if not t.startswith("--"):
+                        task_tuple = self.parse_task(t)
+                        self.tasks.append(Task(*task_tuple))
         except Exception as e:
-            print(("Task.Text: Error initializing plugin: {0}".format(e)))
-        finally:
-            if self._file is not None:
-                self._file.close()
+            logger.debug(("Error initializing plugin: {0}".format(e)))
         return
 
     def get_tasks(self):
         return self.tasks
 
     def parse_task(self, task):
-        return TextTask.parse_task(task)
+        return TextTask._parse_task(task)
 
     @staticmethod
-    def parse_task(task):
+    def _parse_task(task):
         import re
 
         # Sample task format: I:<id> | E:<estimate> | A:<actual> | T:<tags> | D:<desc>

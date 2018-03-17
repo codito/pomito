@@ -1,0 +1,13 @@
+-- Pomito tasks file
+-- Version: 0.1
+-- Legend: I = some unique id, E = Estimated pomodoros, A = Actual pomodoros, C = 0 if task is
+-- incomplete, T = tags separated by commas, D = description of task
+-- vim: set line=0
+I:123 | E:2 | A:4 | C:0 | T:t1,t2, t3, t5,t1,t2, t3, t5,asdadadafsadfsdfsdgggdfgdfgdfghhdhhdhg | D:One task
+I:124 | E:5 | A:3 | C:0 | T:t1,t2, t6 | D:Two task
+I:126 | E:3 | A:5 | C:0 | T:t1 | D:Three task
+I:125 | E:4 | A:3 | C:0 | T:t0, t50 | D:One big task, some of us describe a task like an ebook, not a problem, pomito will still show it appropriately like an ebook, not a problem, pomito will still show it appropriately
+I:125 | E:4 | A:3 | C:0 | T:t0, t50 | D:One big task, some of us describe a task like an ebook, not a problem, pomito will still show it appropriately like an ebook, not a problem, pomito will still show it appropriately. One big task, some of us describe a task like an ebook, not a problem, pomito will still show it appropriately like an ebook, not a problem, pomito will still show it appropriately
+I:127 | E:2 | A:4 | C:1 | T:tagagagagagaagagagaagaga1 | D:
+I:128 | E:3 | A:3 | C:0 | T: | D:Another small task
+-- EOF
