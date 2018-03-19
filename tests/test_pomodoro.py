@@ -153,20 +153,22 @@ class PomodoroServiceTests(unittest.TestCase):
             .disconnect(self.dummy_callback)
 
     def test_break_started_shortbreak(self):
-        self._test_break_started(pomodoro.TimerType.SHORT_BREAK)
+        self._test_break_started(pomodoro.TimerType.SHORT_BREAK, 120)
 
     def test_break_started_longbreak(self):
         self.pomodoro_service._session_count = 4
-        self._test_break_started(pomodoro.TimerType.LONG_BREAK)
+        self._test_break_started(pomodoro.TimerType.LONG_BREAK, 300)
 
-    def _test_break_started(self, break_type):
+    def _test_break_started(self, break_type, duration):
         self.pomodoro_service.signal_break_started \
             .connect(self.dummy_callback, weak=False)
 
         self.pomodoro_service.start_break()
 
-        self.dummy_callback.assert_called_once_with(None,
-                                                    break_type=break_type)
+        self.dummy_callback\
+            .assert_called_once_with(None,
+                                     break_type=break_type,
+                                     break_duration=duration)
 
         self.pomodoro_service.stop_break()
         self.pomodoro_service.signal_break_started \

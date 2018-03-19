@@ -177,7 +177,9 @@ class Pomodoro(object):
             self._timer_type = TimerType.SHORT_BREAK
             _duration = self._config.short_break_duration
         self._timer = self._create_timer(_duration, self._update_state)
-        msg = Message(self.signal_break_started, break_type=self._timer_type)
+        msg = Message(self.signal_break_started,
+                      break_type=self._timer_type,
+                      break_duration=_duration)
         self._pomito_instance.queue_signal(msg)
         self._timer.start()
 

@@ -233,13 +233,15 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_timer.setChecked(False)
         self.update_activity_label(None)
         self._notify_session_stop(reason)
-        self._service.start_break()
 
     def on_break_start(self, *args, **kwargs):
+        self._session_duration = kwargs["break_duration"]
+        self._session_active = True
         self.update_activity_label("break")
         self.btn_timer.setChecked(True)
 
     def on_break_stop(self, *args, **kwargs):
+        self._session_active = True
         self.update_activity_label(None)
         self.btn_timer.setChecked(False)
 
