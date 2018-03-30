@@ -1,7 +1,7 @@
 pomito
 ======
 
-|Build Status| |Windows Build status| |Coverage Status| |Code Health|
+|Build Status| |Windows Build status| |Coverage Status| |Code Health| |Say thanks!|
 
 Simple pomodoro timer with support for tasks and hooks.
 
@@ -72,3 +72,5 @@ Credits
    :target: https://coveralls.io/r/codito/pomito?branch=master
 .. |Code Health| image:: https://landscape.io/github/codito/pomito/master/landscape.svg?style=flat
    :target: https://landscape.io/github/codito/pomito/master
+.. |Say thanks!| image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg 
+   :target: https://saythanks.io/to/codito
