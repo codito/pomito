@@ -53,7 +53,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Setup signals and event handlers.
         """
         # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.reset_timer(True)
+        self.reset_timer(reset_session=True)
         self.update_activity_label(None)
 
         # Setup signal handlers for UI elements
@@ -100,6 +100,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # UI overrides
     ###
     def closeEvent(self, event):
+        """Override the close event for qt window."""
         event.accept()
         if self._session_active:
             self._service.stop_session()
@@ -110,6 +111,7 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._timer_tray.hide()
 
     def resizeEvent(self, resize_event):
+        """Override the resize event for qt window."""
         super(self.__class__, self).resizeEvent(resize_event)
         self.update_activity_label(None)
         return
@@ -118,6 +120,12 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # UI signal handler slots
     ###
     def btn_interrupt_clicked(self, checked, keyboard_context=False):
+        """Interrupt button click handler.
+
+        Args:
+            checked (bool): True if the button is checked
+            keyboard_context (bool): True if the button press is via keyboard
+        """
         if keyboard_context:
             self.btn_interrupt.toggle()
 
@@ -129,23 +137,35 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._interrupt_window.get_interruption()
         else:
             self._service.stop_interruption()
-            self.reset_timer(False)
+            self.reset_timer(reset_session=False)
 
     def btn_task_clicked(self):
+        """Task button click handler."""
         self._task_window.get_task()
 
     def btn_timer_clicked(self, checked, keyboard_context=False):
+        """Timer button click handler.
+
+        Args:
+            checked (bool): True if the button is checked
+            keyboard_context (bool): True if the button press is via keyboard
+        """
         if keyboard_context:
             self.btn_timer.toggle()
 
         if self._session_active:
             self._service.stop_session()
-            self.reset_timer(False)
+            self.reset_timer(reset_session=False)
         else:
             self._task_window.pending_session_start = True
             self._task_window.get_task()
 
     def update_activity_label(self, text):
+        """Update activity label to provided text.
+
+        Args:
+            text (str): text to show in activity label
+        """
         label = "Journey so far...\r\n"
         label += "Completed {0} pomodoros\r\n".format(self._session_count)
         label += "Spent {0:02d}:{1:02d}:{2:02d}hrs in interruptions".format(int(self._interrupt_duration / 60 / 60),
@@ -160,6 +180,13 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.Slot(str, bool, bool)
     def interrupt_selected(self, reason, is_external, add_unplanned_task):
+        """Interrupt selected event handler.
+
+        Args:
+            reason (str): reason for the interrupt
+            is_external (bool): True if the interrupt is externally triggered
+            add_unplanned_task (bool): True if a task should be created
+        """
         # Uncheck state if user opened interrupt window but closed it
         if reason is None:
             self.btn_interrupt.setChecked(False)
@@ -177,6 +204,11 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.Slot(Task)
     def task_selected(self, task):
+        """Task selection event handler.
+
+        Args:
+            task (Task): selected task
+        """
         if self.btn_interrupt.isChecked():
             # Don't do anything if session is active or interruption is running
             return
@@ -204,6 +236,11 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # Pomodoro service signal handlers
     ###
     def on_timer_increment(self, time_elapsed):
+        """Timer increment event handler.
+
+        Args:
+            time_elapsed (int): elapsed time in seconds
+        """
         display_time = time_elapsed if self.btn_interrupt.isChecked() else (self._session_duration - time_elapsed)
         text = "{0:02d}:{1:02d}".format(int(display_time / 60), display_time % 60)
         self.timer_lcd.display(text)
@@ -214,11 +251,13 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self._task_bar.indeterminate(self.winId())
 
     def on_session_start(self, *args, **kwargs):
+        """Session start event handler."""
         self._session_duration = kwargs["session_duration"]
         self._session_active = True
         self._notify_session_start()
 
     def on_session_stop(self, *args, **kwargs):
+        """Session stop event handler."""
         # Reset session count if this is the first session of the day
         if self._last_session_timestamp.date() != datetime.datetime.now().date():
             self._session_count = 0
@@ -235,20 +274,24 @@ class TimerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._notify_session_stop(reason)
 
     def on_break_start(self, *args, **kwargs):
+        """Break start event handler."""
         self._session_duration = kwargs["break_duration"]
         self._session_active = True
         self.update_activity_label("break")
         self.btn_timer.setChecked(True)
 
     def on_break_stop(self, *args, **kwargs):
+        """Break stop event handler."""
         self._session_active = True
         self.update_activity_label(None)
         self.btn_timer.setChecked(False)
 
     def on_interrupt_start(self, *args, **kwargs):
+        """Interrupt start event handler."""
         pass
 
     def on_interrupt_stop(self, *args, **kwargs):
+        """Interrupt stop event handler."""
         self._interrupt_duration += kwargs['duration']
         self.btn_interrupt.setChecked(False)
         self.btn_timer.setDisabled(False)
