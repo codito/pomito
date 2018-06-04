@@ -116,6 +116,7 @@ class TaskWindow(QtWidgets.QWidget, Ui_TaskWindow):
     def closeEvent(self, event):
         """Close the window."""
         event.accept()
+        self.list_task_selected()
 
     ###
     # UI signal handler slots
