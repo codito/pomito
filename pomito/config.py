@@ -69,8 +69,9 @@ class Configuration(object):
             self.long_break_frequency = self._parser.getint("pomito", "long_break_frequency")
 
         if self._parser.has_section("plugins"):
-            self.ui_plugin = self._parser.get("plugins", "ui")
-            self.task_plugin = self._parser.get("plugins", "task")
+            self.ui_plugin = self._parser.get("plugins", "ui", fallback=self.ui_plugin)
+            self.task_plugin = self._parser.get("plugins", "task",
+                                                fallback=self.task_plugin)
 
     def _get_seconds(self, section, setting):
         return math.floor(self._parser.getfloat(section, setting) * 60)

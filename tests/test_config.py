@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for pomito configuration."""
 
+import copy
 import os
 import pytest
 from pyfakefs import fake_filesystem
@@ -125,6 +126,28 @@ def test_load_prefers_env_config_file_over_specified(config, fs):
         assert c.get_setting("section1") == [("k1", "v1")]
     finally:
         del os.environ["POMITO_CONFIG"]
+
+
+def test_load_sets_default_task_plugin_without_task_plugin_config(config, fs):
+    data = copy.deepcopy(config_data)
+    del(data["plugins"]["task"])
+    _create_config(config_file, data)
+
+    c = Configuration(config_file)
+    c.load()
+
+    assert c.task_plugin == "nulltask"
+
+
+def test_load_sets_default_ui_plugin_without_ui_plugin_config(config, fs):
+    data = copy.deepcopy(config_data)
+    del(data["plugins"]["ui"])
+    _create_config(config_file, data)
+
+    c = Configuration(config_file)
+    c.load()
+
+    assert c.ui_plugin == "qtapp"
 
 
 def test_get_setting_throws_if_not_loaded(config):
