@@ -37,7 +37,7 @@ executables = [cx_Freeze.Executable("pomito.py",
                                     icon="data/qt/pomito_64x64.ico")]
 buildOptions = dict(packages=["certifi"],
                     excludes=["tkinter"],
-                    includes=["atexit", "sip", "idna.idnadata"],
+                    includes=["atexit", "PyQt5.sip", "idna.idnadata"],
                     include_files=includefiles,
                     zip_include_packages=["*"],
                     zip_exclude_packages=["certifi"],

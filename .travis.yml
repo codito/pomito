@@ -1,10 +1,10 @@
 sudo: false
 language: python
 cache: pip
-dist: trusty
+dist: bionic
 
 python:
-- '3.6.4'
+- "3.8"
 
 env:
   matrix:
@@ -21,8 +21,7 @@ addons:
     - xauth
 
 install:
-- pip install pipenv
-- pipenv install --dev --skip-lock --verbose
+- pip install -r development.txt
 
 before_install:
 - "export DISPLAY=:99.0"

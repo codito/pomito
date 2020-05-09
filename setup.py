@@ -28,7 +28,7 @@ REQUIRED = [
     "asana",
     "blinker",
     "click>=6.7",
-    "comtypes==1.1.3post2",
+    "comtypes==1.1.7",
     "cx-freeze",
     # "pywin32",
     "peewee",

@@ -26,7 +26,7 @@ def trello_api(request):
     api_key = os.getenv("TRELLO_API_KEY")
     api_secret = os.getenv("TRELLO_API_SECRET")
     if api_key is None or api_secret is None:
-        if request.node.get_marker("integration") is not None:
+        if request.node.get_closest_marker("integration") is not None:
             pytest.skip("Trello integration test requires API keys.")
         return MagicMock(spec=TrelloClient)
     return TrelloClient(api_key, api_secret)

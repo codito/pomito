@@ -1,0 +1,14 @@
+-r requirements.txt
+wheel
+coveralls
+cx-freeze
+flake8
+flake8-docstrings
+mkdocs
+mkdocs-material
+pyfakefs
+pytest==5.3.2
+pytest-cov
+pytest-mock
+pytest-qt
+pytest-xvfb

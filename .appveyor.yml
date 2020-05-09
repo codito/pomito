@@ -1,4 +1,4 @@
-image: Visual Studio 2015
+image: Visual Studio 2019
 
 # Turn off default msbuild integration
 build: false
@@ -12,10 +12,10 @@ environment:
 
 init:
   - ps: ls -Name "c:\\python*"
-  - "SET PATH=\\Python36;\\Python36\\Scripts;%PATH%"
+  - "SET PATH=\\Python38;\\Python38\\Scripts;%PATH%"
 
 install:
-  - ps: ls -name "C:\\Python36\\Lib\\site-packages"
+  - ps: ls -name "C:\\Python38\\Lib\\site-packages"
 
   # Check that we have the expected version and architecture for Python
   - "python --version"
@@ -26,9 +26,9 @@ install:
   - "pip install pipenv"
   - "python -m venv .venv"
   - ps: .venv\Scripts\activate.ps1
-  - "pipenv install --dev --skip-lock --verbose"
+  - "pip install -r development.txt"
   - "python setup_freeze.py build"
-  - cd build/exe.win32-3.6
+  - cd build/exe.win32-3.8
   - ps: $env:pomito_zip = "pomito.$($env:APPVEYOR_BUILD_VERSION).win32.zip"
   - ps: "& 7z a -r ../$env:pomito_zip ."
   - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { $pomito_path = $(Resolve-Path "../$env:pomito_zip"); curl.exe -fsS -k -u "$($env:bintray_user):$env:bintray_key" -X PUT "https://api.bintray.com/content/codito/generic/pomito/$env:APPVEYOR_BUILD_VERSION/$($env:pomito_zip)?publish=1" --data-binary "@$pomito_path" }
@@ -38,7 +38,8 @@ on_finish:
 
 test_script:
   - cd /D %APPVEYOR_BUILD_FOLDER%
-  - "pipenv run pytest"
+  - ps: .venv\Scripts\activate.ps1
+  - "pytest"
 
 artifacts:
   - path: build/*.zip
